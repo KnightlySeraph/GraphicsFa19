@@ -1,0 +1,28 @@
+<html>
+    <head>
+        <title>Shapes Lab 1</title>
+        <meta charset = "ISO-8859-1" />
+        <style type = "text/css">  
+            #myCanvas{
+                border: 1px solid black;
+            }
+        </style>
+
+        <!--  add javascript -->
+        <script src = "shapes.js"></script>
+        <script id = "fragShader" type = "fragmentShader">
+            precision mediump float;
+
+            void main () {
+                gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+            }
+        </script>
+
+    </head>
+    <body>
+        <canvas id = "myCanvas" width = 800 height = 800></canvas>
+        <script>
+            render();
+        </script>
+    </body>
+</html>
