@@ -85,6 +85,7 @@ gl.clear(gl.COLOR_BUFFER_BIT | gl.COLOR_DEPTH_BIT)
 star1(gl)
 star2(gl)
 star3(gl)
+//hexagon(gl);
 }
 
 /**
@@ -127,14 +128,12 @@ let sqaureVertices = [0, 0, 0,
  * @param {WebGLRenderingContext} gl WebGL context to draw to
  */
 function hexagon (gl) {
-    let hexVertices = [1, 0, 0,
-            2, 0, 0,
-            3, 1, 0,
-            3, 2, 0,
-            2, 3, 0,
-            1, 3, 0,
-            0, 2, 0,
-            0, 1, 0];
+    let hexVertices = [-0.75, 0, 0,
+        -0.5, 0.5, 0,
+        -0.25, 0.5, 0,
+        0.0, 0, 0,
+        -0.25, -0.5, 0,
+        -0.5, -0.5, 0];
 
     // create buffer
     let hexBuffer = gl.createBuffer();
@@ -153,7 +152,7 @@ function hexagon (gl) {
 
     // make sure buffer is active
     gl.bindBuffer(gl.ARRAY_BUFFER, hexBuffer);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 8);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 6);
 }
 
 /**
