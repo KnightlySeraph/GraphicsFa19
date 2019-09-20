@@ -1,4 +1,4 @@
-
+/* eslint no-unused-vars: ["warn", { "varsIgnorePattern": "render" }] */
 
 const sqaureVertex = `
 attribute vec4 vertex;
@@ -8,7 +8,7 @@ void main() {
     gl_Position = vertex;
 }
 
-`
+`;
 
 
 /**
@@ -35,10 +35,10 @@ function loadShader(gl, shaderType, src) {
 }
 
 /**
-* 
-* @param {WebGLRenderingContext} gl 
-* @param {String} vertexSrc 
-* @param {String} fragmentSrc 
+*
+* @param {WebGLRenderingContext} gl Context to Draw to
+* @param {String} vertexSrc Vertex Shader Code
+* @param {String} fragmentSrc Fragment Shader Code
 */
 function createProgram(gl, vertexSrc, fragmentSrc) {
     let vertexShader = loadShader(gl, gl.VERTEX_SHADER, vertexSrc);
@@ -62,12 +62,12 @@ function createProgram(gl, vertexSrc, fragmentSrc) {
 }
 
 
-function render() {
+function render () {
     // DO stuff
     /** @type {HTMLCanvasElement} */
-    let canvas = document.getElementById("myCanvas")
+    let canvas = document.getElementById("myCanvas");
     /** @type {WebGLRenderingContext} */
-    let gl = canvas.getContext("webgl")
+    let gl = canvas.getContext("webgl");
 
     // Set width and height
     canvas.width = canvas.clientWidth;
@@ -80,61 +80,27 @@ function render() {
     gl.enable(gl.DEPTH_TEST);
     gl.clearDepth(1);
 
-    gl.clearColor(0.8863, 0.4157, 0.9216, 1.0)
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.COLOR_DEPTH_BIT)
-    star1(gl)
-    star2(gl)
-    star3(gl)
+    gl.clearColor(0.8863, 0.4157, 0.9216, 1.0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.COLOR_DEPTH_BIT);
+    star1(gl);
+    star2(gl);
+    star3(gl);
     hexagon(gl);
     circle(gl);
 }
 
-/**
-* Draws a sqaure
-* 
-* @param {WebGLRenderingContext} gl WebGL context to draw to
-*/
-function sqaure(gl) {
-    // Create the vertices for the sqaure
-    let sqaureVertices = [0, 0, 0,
-        1, 0, 0,
-        1, 1, 0,
-        0, 1, 0];
-    console.log(sqaureVertices);
-
-    // create buffer
-    let sqaureBuffer = gl.createBuffer();
-    // bind buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, sqaureBuffer);
-    // buffer data
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(sqaureVertices), gl.STATIC_DRAW);
-
-    let program = createProgram(gl, sqaureVertex, sqaureFragment);
-
-    let vert = gl.getAttribLocation(program, "vertex");
-    gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(vert);
-
-    gl.useProgram(program);
-
-    // make sure buffer is active
-    gl.bindBuffer(gl.ARRAY_BUFFER, sqaureBuffer);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-
-}
 
 /**
- * 
+ *
  * @param {WebGLRenderingContext} gl WebGL context to draw to
  */
 function hexagon(gl) {
     let hexVertices = [-0.9, 0.75, 0,
-    -0.75, 0.9, 0,
-    -0.6, 0.9, 0,
-    -0.45, 0.75, 0,
-    -0.6, 0.6, 0,
-    -0.75, 0.6, 0];
+        -0.75, 0.9, 0,
+        -0.6, 0.9, 0,
+        -0.45, 0.75, 0,
+        -0.6, 0.6, 0,
+        -0.75, 0.6, 0];
 
     // create buffer
     let hexBuffer = gl.createBuffer();
@@ -157,7 +123,7 @@ function hexagon(gl) {
 }
 
 /**
- * 
+ *
  * @param {WebGLRenderingContext} gl WebGL context to draw to
  */
 function star1(gl) {
@@ -239,12 +205,12 @@ function star3(gl) {
 }
 
 function circle(gl) {
-    cRadius = 0.1;
+    let cRadius = 0.1;
     let circleVertices = [0, 0, 0];
 
-    for (i = 0; i < 360; i++) {
-        x = cRadius * Math.cos(i);
-        y = cRadius * Math.sin(i);
+    for (let i = 0; i < 360; i++) {
+        let x = cRadius * Math.cos(i);
+        let y = cRadius * Math.sin(i);
         circleVertices.push(x);
         circleVertices.push(y);
         circleVertices.push(0);
