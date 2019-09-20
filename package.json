@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "eslint": "^6.3.0",
     "npm": "^6.11.3"
   },
   "devDependencies": {
+    "eslint": "^6.4.0",
     "jasmine": "^3.4.0"
   },
   "scripts": {
