@@ -80,7 +80,7 @@ gl.viewport(0, 0, canvas.width, canvas.height);
 gl.enable(gl.DEPTH_TEST);
 gl.clearDepth(1);
 
-gl.clearColor(0.0, 0.0, 1.0, 1.0)
+gl.clearColor(0.8863, 0.4157, 0.9216, 1.0)
 gl.clear(gl.COLOR_BUFFER_BIT | gl.COLOR_DEPTH_BIT)
 star1(gl)
 star2(gl)
@@ -257,13 +257,13 @@ function circle (gl) {
     // buffer data
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(circleVertices), gl.STATIC_DRAW);
 
-    let program = createProgram(gl, sqaureVertex, document.getElementById("fragShader").innerText);
+    let program2 = createProgram(gl, sqaureVertex, document.getElementById("fragShader2").innerText);
 
-    let vert = gl.getAttribLocation(program, "vertex");
+    let vert = gl.getAttribLocation(program2, "vertex");
     gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(vert);
 
-    gl.useProgram(program);
+    gl.useProgram(program2);
 
     // make sure buffer is active
     gl.bindBuffer(gl.ARRAY_BUFFER, circleBuffer);
