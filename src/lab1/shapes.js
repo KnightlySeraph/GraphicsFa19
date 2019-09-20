@@ -82,9 +82,9 @@ gl.clearDepth(1);
 
 gl.clearColor(0.0, 0.0, 1.0, 1.0)
 gl.clear(gl.COLOR_BUFFER_BIT | gl.COLOR_DEPTH_BIT)
-// star1(gl)
-// star2(gl)
-// star3(gl)
+star1(gl)
+star2(gl)
+star3(gl)
 hexagon(gl);
 circle(gl);
 }
@@ -161,9 +161,9 @@ function hexagon (gl) {
  * @param {WebGLRenderingContext} gl WebGL context to draw to
  */
 function star1 (gl) {
-    let starVertices = [0, 1, 0,
-        0.25, 0, 0,
-        -0.5, -0.5, 0];
+    let starVertices = [0.5, 0.75, 0,
+            0.25, 0.25, 0,
+            0.65, 0.5, 0];
 
 
     // create buffer
@@ -187,9 +187,9 @@ function star1 (gl) {
 }
 
 function star2 (gl) {
-    let starVertices = [0.25, 0.5, 0,
-        0.5, -0.5, 0,
-        -0.5, 0.5, 0];    
+    let starVertices = [0.25, 0.6, 0,
+        0.6, 0.6, 0,
+        0.75, 0.25, 0];   
 
 
     // create buffer
@@ -213,9 +213,9 @@ function star2 (gl) {
 }
 
 function star3 (gl) {
-    let starVertices = [0.5, 0.5, 0,
-        -0.5, -0.5, 0,
-        -0.25, 0.5, 0];
+    let starVertices = [0.6, 0.6, 0,
+        0.75, 0.6, 0,
+        0.64, 0.5, 0];
 
 
     // create buffer
