@@ -82,7 +82,9 @@ gl.clearDepth(1);
 
 gl.clearColor(0.0, 0.0, 1.0, 1.0)
 gl.clear(gl.COLOR_BUFFER_BIT | gl.COLOR_DEPTH_BIT)
-star(gl)
+star1(gl)
+star2(gl)
+star3(gl)
 }
 
 /**
@@ -158,12 +160,10 @@ function hexagon (gl) {
  * 
  * @param {WebGLRenderingContext} gl WebGL context to draw to
  */
-function star (gl) {
-    let starVertices = [0, 0, 0,
-        2, 1, 0,
-        0, 1, 0,
-        2, 0, 0, 
-        1, 3, 0];
+function star1 (gl) {
+    let starVertices = [0, 1, 0,
+        0.25, 0, 0,
+        -0.5, -0.5, 0];
 
 
     // create buffer
@@ -183,5 +183,57 @@ function star (gl) {
 
     // make sure buffer is active
     gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
-    gl.drawArrays(gl.TRIANGLE_FAN, 0, 5);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+function star2 (gl) {
+    let starVertices = [0.25, 0.5, 0,
+        0.5, -0.5, 0,
+        -0.5, 0.5, 0];    
+
+
+    // create buffer
+    let starBuffer = gl.createBuffer();
+    // bind buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
+    // buffer data
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(starVertices), gl.STATIC_DRAW);
+
+    let program = createProgram(gl, sqaureVertex, document.getElementById("fragShader").innerText);
+
+    let vert = gl.getAttribLocation(program, "vertex");
+    gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vert);
+
+    gl.useProgram(program);
+
+    // make sure buffer is active
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+}
+
+function star3 (gl) {
+    let starVertices = [0.5, 0.5, 0,
+        -0.5, -0.5, 0,
+        -0.25, 0.5, 0];
+
+
+    // create buffer
+    let starBuffer = gl.createBuffer();
+    // bind buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
+    // buffer data
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(starVertices), gl.STATIC_DRAW);
+
+    let program = createProgram(gl, sqaureVertex, document.getElementById("fragShader").innerText);
+
+    let vert = gl.getAttribLocation(program, "vertex");
+    gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(vert);
+
+    gl.useProgram(program);
+
+    // make sure buffer is active
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
 }
