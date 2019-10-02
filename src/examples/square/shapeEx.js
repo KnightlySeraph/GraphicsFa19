@@ -3,11 +3,11 @@
 const squareVertex = `
 
     attribute vec4 vertex;
-    uniform vec3 offset;
+    uniform mat4 model;
 
     void main() {
         // assign a value to gl_Position
-        gl_Position = vertex + vec4(offset, 0);
+        gl_Position = model * vertex;
     }
 
 `;
@@ -78,6 +78,7 @@ class Shape {
     // TODO constructor
     constructor() {
 
+        this.buffered = false;
         this.program = null;
         this.buffer = null;
         this.vertices = null;
@@ -129,6 +130,26 @@ class Square extends Shape {
         super();
 
         // square's setup
+        // create the verices for the square
+        this.vertices = [-0.5, -0.5, 0,
+            -0.5, 0.5, 0,
+            0.5, -0.5, 0,
+            0.5, 0.5, 0];
+    }
+
+    /**
+     * @param {WebGLRenderingContext} gl Canvas to draw to
+     */
+    bufferData(gl) {
+        // create buffer
+        this.buffer = gl.createBuffer();
+        // bind buffer
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+        // buffer the data
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.vertices), gl.STATIC_DRAW);
+
+        this.program = createProgram(gl, squareVertex,
+            document.getElementById("fragShader").innerText);
     }
 
     // render
@@ -138,36 +159,27 @@ class Square extends Shape {
  * @param {WebGLRenderingContext} gl WebGL context to draw to
  */
     render(gl) {
-        // create the verices for the square
-        let squareVertices = [-0.5, -0.5, 0,
-            -0.5, 0.5, 0,
-            0.5, -0.5, 0,
-            0.5, 0.5, 0];
-        // squareVertices.push(0, 1, 0);
-        console.log("Square:", squareVertices);
+        if (!this.buffered) {
+            // do buffering
+            this.bufferData(gl);
+            this.buffered = true;
+        }
 
-        // create buffer
-        let squareBuffer = gl.createBuffer();
-        // bind buffer
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
-        // buffer the data
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squareVertices), gl.STATIC_DRAW);
-
-        let program = createProgram(gl, squareVertex,
-            document.getElementById("fragShader").innerText);
-
-        let vert = gl.getAttribLocation(program, "vertex");
+        let vert = gl.getAttribLocation(this.program, "vertex");
         gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vert);
 
-        gl.useProgram(program);
+        gl.useProgram(this.program);
 
-        let pos = gl.getUniformLocation(program, "offset");
-        gl.uniform3fv(pos, new Float32Array([this.loc.x, this.loc.y, this.loc.z]));
+        let model = gl.getUniformLocation(this.program, "model");
+        gl.uniformMatrix4fv(model, false, new Float32Array([1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            this.loc.x, this.loc.y, this.loc.z, 1]));
 
 
         // make sure the buffer is active
-        gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
     }
