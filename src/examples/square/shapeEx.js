@@ -96,6 +96,12 @@ class Shape {
             height: 1
         };
 
+        this.rotation = {
+            x: 0,
+            y: 0,
+            z: 0
+        };
+
 
     }
 
@@ -108,6 +114,12 @@ class Shape {
         this.loc.x = x;
         this.loc.y = y;
         this.loc.z = z;
+    }
+
+    setRotation (x, y, z) {
+        this.rotation.x = x;
+        this.rotation.y = y;
+        this.rotation.z = z;
     }
 
 
@@ -172,8 +184,10 @@ class Square extends Shape {
         gl.useProgram(this.program);
 
         let model = gl.getUniformLocation(this.program, "model");
-        gl.uniformMatrix4fv(model, false, new Float32Array([1, 0, 0, 0,
-            0, 1, 0, 0,
+        let s = Math.sin(this.rotation.z);
+        let c = Math.cos(this.rotation.z);
+        gl.uniformMatrix4fv(model, false, new Float32Array([c, s, 0, 0,
+            -s, c, 0, 0,
             0, 0, 1, 0,
             this.loc.x, this.loc.y, this.loc.z, 1]));
 

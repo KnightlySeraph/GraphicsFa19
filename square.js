@@ -28,6 +28,7 @@ function render(canvas, gl) {
 var speedx = 0.05;
 var speedy = 0.05;
 var speedz = 0;
+var rotateZ = 0;
 
 let s = new Square();
 /**
@@ -53,6 +54,8 @@ function square(gl) {
         speedz *= -1;
     }
     s.setLoc(currLoc.x + speedx, currLoc.y + speedy, currLoc.z + speedz);
+    rotateZ += Math.PI / 45;
+    s.setRotation(0, 0, rotateZ);
     s.render(gl);
 
     // console.info("Animated", time);
