@@ -57,6 +57,7 @@ class Matrix {
      */
     getData() {
         // TODO
+        return this.mat;
     }
 
     /**
@@ -67,6 +68,7 @@ class Matrix {
      */
     getValue(r, c) {
         // TODO
+        return this.mat[r + 4 * c];
     }
 
     /**
@@ -78,6 +80,8 @@ class Matrix {
      */
     setValue(r, c, value) {
         // TODO
+
+        this.mat[r + 4 * c] = value;
     }
 
     /**
@@ -88,6 +92,8 @@ class Matrix {
      */
     identity() {
         // TODO
+
+        return Matrix([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
     }
 
     /**
@@ -100,6 +106,8 @@ class Matrix {
      */
     mult(matB) {
         // TODO
+        let values = [];
+        values.push(this.mat[0] * matB.mat[0] + this.mat[1] * matB.mat[4] + this.mat[2] * matB[8] + this.mat[3] * matB.mat[12]);
     }
 
     /**
