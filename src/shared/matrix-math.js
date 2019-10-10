@@ -45,6 +45,8 @@ class Matrix {
      */
     constructor(values) {
         // TODO
+        this.mat = values;
+        
     }
 
     /**
@@ -253,6 +255,16 @@ class Vector {
      */
     constructor(values) {
         // TODO
+
+        if (values !== "undefined") {
+            this.x = values[0];
+            this.y = values[1];
+            this.z = values[2];
+        } else {
+            this.x = 0.0;
+            this.y = 0.0;
+            this.z = 0.0;
+        }
     }
 
     /**
@@ -266,6 +278,7 @@ class Vector {
      */
     crossProduct(v) {
         // TODO
+        return Vector([this.y * v.z - this.z * v.y, this.z * v.x - this.x * v.z, this.x * v.y - this.y * v.x]);
     }
 
     /**
@@ -279,6 +292,8 @@ class Vector {
      */
     dotProduct(v) {
         // TODO
+
+        return this.x * v.x + this.y * v.y + this.z * v.z;
     }
 
     /**
@@ -292,6 +307,8 @@ class Vector {
      */
     add(v) {
         // TODO
+
+        return Vector([this.x + v.x, this.y + v.y, this.z + v.z]);
     }
 
     /**
@@ -305,6 +322,8 @@ class Vector {
      */
     subtract(v) {
         // TODO
+
+        return Vector([this.x - v.x, this.y - v.y, this.z - v.z]);
     }
 
     /**
@@ -319,6 +338,12 @@ class Vector {
      */
     normalize() {
         // TODO
+        let divisor = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+        if (divisor !== 0) {
+            return Vector([this.x / divisor, this.y / divisor, this.z / divisor]);
+        } else {
+            console.error("Cannot divide by zero");
+        }
     }
 
     /**
@@ -328,6 +353,8 @@ class Vector {
      */
     length() {
         // TODO
+
+        return Math.abs(Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2)));
     }
 
     /**
@@ -343,6 +370,8 @@ class Vector {
      */
     scale(s) {
         // TODO
+
+        return Vector([this.x * s, this.y * s, this.z * s]);
     }
 
     /**
@@ -352,6 +381,8 @@ class Vector {
      */
     getX() {
         // TODO
+
+        return this.x;
     }
 
     /**
@@ -361,6 +392,8 @@ class Vector {
      */
     getY() {
         // TODO
+
+        return this.y;
     }
 
     /**
@@ -370,6 +403,8 @@ class Vector {
      */
     getZ() {
         // TODO
+
+        return this.z;
     }
 
     /**
@@ -383,6 +418,8 @@ class Vector {
      */
     getData() {
         // TODO
+
+        return [this.x, this.y, this.z, 0];
     }
 }
 
