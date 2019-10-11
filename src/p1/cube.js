@@ -166,14 +166,21 @@ class Cube {
         }
 
         // TODO Create bindings between the cube data and the shaders
+        let vert = gl.getAttribLocation(this.program, "cubeLocation");
+        gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vert);
         // TODO bind verticesBuffer to the cubeLocation attribute (ARRAY_BUFFER)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
         // TODO bind colorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
-
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
 
         gl.useProgram(this.program);
 
         // TODO bind projection (get its data as an array) to the projection uniform (it is a matrix)
         // TODO bind this.model (get its data as an array) to the matModel uniform (it is a matrix)
+
+        let model = gl.getUniformLocation(this.program, "model");
+        gl.uniformMatrix4fv(model, false, projection.getData());
 
 
         if (!this.wire) {
@@ -183,6 +190,7 @@ class Cube {
 
         // wire frame
         // TODO bind edgeColorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.edgeColorsBuffer);
 
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgesBuffer);
