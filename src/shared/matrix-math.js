@@ -43,7 +43,7 @@ class Matrix {
      * @param {number[]} values (optional) An array of floating point values.
      *
      */
-    constructor(values) {
+    constructor(values = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) {
         // TODO
         this.mat = values;
         
@@ -57,7 +57,34 @@ class Matrix {
      */
     getData() {
         // TODO
-        return this.mat;
+        return new Float32Array(this.mat);
+    }
+
+    /**
+     * Returns a new matrix that is a copy of the current one
+     * Except the values have been transposed
+     *
+     * @return {Matrix} A copy matrix with its values transposed
+     */
+    transpose() {
+        let newMat = this.mat;
+
+        // Reorder Indices
+        newMat[1] = this.mat[4];
+        newMat[2] = this.mat[8];
+        newMat[3] = this.mat[12];
+        newMat[4] = this.mat[1];
+        newMat[6] = this.mat[9];
+        newMat[7] = this.mat[13];
+        newMat[8] = this.mat[2];
+        newMat[9] = this.mat[6];
+        newMat[11] = this.mat[14];
+        newMat[12] = this.mat[3];
+        newMat[13] = this.mat[7];
+        newMat[14] = this.mat[11];
+
+        return new Matrix(newMat);
+
     }
 
     /**
@@ -107,7 +134,21 @@ class Matrix {
     mult(matB) {
         // TODO
         let values = [];
-        values.push(this.mat[0] * matB.mat[0] + this.mat[1] * matB.mat[4] + this.mat[2] * matB[8] + this.mat[3] * matB.mat[12]);
+        let vert = 0;
+        console.log("Mult is being called");
+
+        // Loop Through and multiply
+        for (let t = 0; t < 15; t += 4) {
+            for (let i = 0; i < 4; i++) {
+                for (let z = 0; z < 4; z++) {
+                    vert += this.mat[z + t] * matB.mat[z * 4 + i];
+                }
+                values.push(vert);
+                vert = 0;
+            }
+        }
+
+        return new Matrix(values);
     }
 
     /**
@@ -124,6 +165,13 @@ class Matrix {
      */
     translate(x, y, z) {
         // TODO
+
+        let t = new Matrix([1, 0, 0, x,
+            0, 1, 0, y,
+            0, 0, 1, z,
+            0, 0, 0, 1]);
+
+        return this.mult(t);
     }
 
     /**
@@ -141,6 +189,17 @@ class Matrix {
      */
     rotateX(theta, x = 0, y = 0, z = 0) {
         // TODO
+        theta = theta * (Math.PI / 180);
+        let c = Math.cos(theta);
+        let s = Math.sin(theta);
+
+        let rx = new Matrix([1, 0, 0, 0,
+            0, c, -s, 0, 0,
+            0, s, c, 0,
+            0, 0, 0, 1]);
+
+        return this.mult(rx);
+
     }
 
     /**
@@ -158,6 +217,16 @@ class Matrix {
      */
     rotateY(theta, x = 0, y = 0, z = 0) {
         // TODO
+        theta = theta * (Math.PI / 180);
+        let c = Math.cos(theta);
+        let s = Math.sin(theta);
+
+        let ry = new Matrix([c, 0, s, 0,
+            0, 1, 0, 0,
+            -s, 0, c, 0,
+            0, 0, 0, 1]);
+
+        return this.mult(ry);
     }
 
     /**
@@ -175,6 +244,16 @@ class Matrix {
      */
     rotateZ(theta, x = 0, y = 0, z = 0) {
         // TODO
+        theta = theta * (Math.PI / 180);
+        let c = Math.cos(theta);
+        let s = Math.sin(theta);
+
+        let rz = new Matrix([c, -s, 0, 0,
+            s, c, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1]);
+
+        return this.mult(rz);
     }
 
     /**
@@ -216,6 +295,12 @@ class Matrix {
      */
     scale(sx, sy, sz, x = 0, y = 0, z = 0) {
         // TODO
+
+        let s = new Matrix([sx, 0, 0, 0,
+            0, sy, 0, 0,
+            0, 0, sz, 0,
+            0, 0, 0, 1]);
+        return this.mult(s);
     }
 
     /**

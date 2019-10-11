@@ -168,6 +168,11 @@
 
             // gl.enable(gl.CULL_FACE);
 
+            let transformMatrix = new Matrix();
+            transformMatrix = transformMatrix.rotateX(-35.264);
+            transformMatrix = transformMatrix.rotateY(45);
+            transformMatrix = transformMatrix.scale(1, 1, -1);
+
             return {
                 glContext: gl,
                 rotating: true,
@@ -178,7 +183,7 @@
                 // scale the axes first so that the z-axis is reflected (they should stay
                 // the same size). The matrix should scale and then rotate.
                 // Modify the next line
-                proj: new Matrix(),
+                proj: transformMatrix,
                 speedx: 0,
                 speedy: 0,
                 speedz: 0,
