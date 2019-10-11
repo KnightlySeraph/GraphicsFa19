@@ -1,5 +1,6 @@
 /* eslint no-unused-vars: ["warn", {"varsIgnorePattern": "(Matrix)|(Vector)|(Camera)"}] */
 
+
 /**
  * Represents a 4x4 matrix suitable for performing transformations
  * on a vector of homogeneous coordinates.
@@ -190,7 +191,7 @@ class Matrix {
             0, 0, 1, z,
             0, 0, 0, 1]);
 
-        
+
         return this.mult(t);
     }
 
