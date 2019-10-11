@@ -110,14 +110,19 @@ class Cube {
         // TODO The cube is defined to be 1 unit is size with one corner on the origin
         // TODO Move it so it is centered on the origin and scale it so it is half size.
         // TODO Assign the value to this.world.
-        this.world = new Matrix(); // TODO modify this line
+        // TODO modify this line
+        this.world = new Matrix().scale(0.5, 0.5, 0.5).translate(-0.5, -0.5, -0.5); // TODO modify this line
+
+
 
         // create identity matrices for each transformation
         this.scaleMatrix = new Matrix(); // scale matrix
         this.rotateMatrix = new Matrix(); // rotate matrix
         this.translateMatrix = new Matrix(); // translate
         // create identity matrix for the model
-        this.model = new Matrix(); // model matrix
+        // this.model = this.translateMatrix; // model matrix
+        this.model = new Matrix();
+
 
         this.buffered = false;
     }
@@ -166,13 +171,18 @@ class Cube {
         }
 
         // TODO Create bindings between the cube data and the shaders
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
         let vert = gl.getAttribLocation(this.program, "cubeLocation");
         gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vert);
         // TODO bind verticesBuffer to the cubeLocation attribute (ARRAY_BUFFER)
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+     
         // TODO bind colorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
         gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
+        let col = gl.getAttribLocation(this.program, "cubeColor");
+        gl.vertexAttribPointer(col, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(col);
+        
 
         gl.useProgram(this.program);
 
@@ -180,7 +190,10 @@ class Cube {
         // TODO bind this.model (get its data as an array) to the matModel uniform (it is a matrix)
 
         let model = gl.getUniformLocation(this.program, "model");
-        gl.uniformMatrix4fv(model, false, projection.getData());
+        gl.uniformMatrix4fv(model, false, this.getModel().getData());
+
+        let proj = gl.getUniformLocation(this.program, "projection");
+        gl.uniformMatrix4fv(proj, false, projection.getData());
 
 
         if (!this.wire) {
@@ -191,6 +204,9 @@ class Cube {
         // wire frame
         // TODO bind edgeColorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
         gl.bindBuffer(gl.ARRAY_BUFFER, this.edgeColorsBuffer);
+        let eCol = gl.getAttribLocation(this.program, "cubeColor");
+        gl.vertexAttribPointer(eCol, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(eCol);
 
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgesBuffer);
@@ -207,6 +223,7 @@ class Cube {
      */
     scale(sx, sy, sz) {
         // TODO
+        // this.model = 
     }
 
     /**
@@ -245,7 +262,11 @@ class Cube {
      */
     getModel() {
         // TODO update this.model and then return the result
-        this.model = new Matrix();
+        // this.model.translate();
+        // this.model.rotate();
+        // this.model.scale();
+        this.model = this.translateMatrix.mult(this.rotateMatrix.mult(this.scaleMatrix.mult(this.world)));
+        // this.model.world();
         return this.model;
     }
 }

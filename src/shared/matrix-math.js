@@ -45,7 +45,8 @@ class Matrix {
      */
     constructor(values = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) {
         // TODO
-        this.mat = values;
+        // this.mat = values;
+        this.mat = this.transpose(values);
         
     }
 
@@ -64,26 +65,26 @@ class Matrix {
      * Returns a new matrix that is a copy of the current one
      * Except the values have been transposed
      *
-     * @return {Matrix} A copy matrix with its values transposed
+     * @return {values []} A copy matrix with its values transposed
      */
-    transpose() {
-        let newMat = this.mat;
+    transpose(values) {
+        let newMat = values.slice(0);
 
         // Reorder Indices
-        newMat[1] = this.mat[4];
-        newMat[2] = this.mat[8];
-        newMat[3] = this.mat[12];
-        newMat[4] = this.mat[1];
-        newMat[6] = this.mat[9];
-        newMat[7] = this.mat[13];
-        newMat[8] = this.mat[2];
-        newMat[9] = this.mat[6];
-        newMat[11] = this.mat[14];
-        newMat[12] = this.mat[3];
-        newMat[13] = this.mat[7];
-        newMat[14] = this.mat[11];
+        newMat[1] = values[4];
+        newMat[2] = values[8];
+        newMat[3] = values[12];
+        newMat[4] = values[1];
+        newMat[6] = values[9];
+        newMat[7] = values[13];
+        newMat[8] = values[2];
+        newMat[9] = values[6];
+        newMat[11] = values[14];
+        newMat[12] = values[3];
+        newMat[13] = values[7];
+        newMat[14] = values[11];
 
-        return new Matrix(newMat);
+        return newMat;
 
     }
 
@@ -135,20 +136,33 @@ class Matrix {
         // TODO
         let values = [];
         let vert = 0;
-        console.log("Mult is being called");
+        let mMat = new Matrix();
+        // console.log("Mult is being called");
 
         // Loop Through and multiply
-        for (let t = 0; t < 15; t += 4) {
+        // for (let t = 0; t < 15; t += 4) {
+        //     for (let i = 0; i < 4; i++) {
+        //         for (let z = 0; z < 4; z++) {
+        //             vert += this.mat[z + t] * matB.mat[z * 4 + i];
+        //         }
+        //         values.push(vert);
+        //         vert = 0;
+        //     }
+        // }
+
+        for (let t = 0; t < 4; t++) {
             for (let i = 0; i < 4; i++) {
                 for (let z = 0; z < 4; z++) {
-                    vert += this.mat[z + t] * matB.mat[z * 4 + i];
+                    vert += this.getValue(t, z) * matB.getValue(z, i);
                 }
-                values.push(vert);
+                // values.push(vert);
+                mMat.setValue(t, i, vert);
                 vert = 0;
             }
         }
+       
 
-        return new Matrix(values);
+        return mMat;
     }
 
     /**
@@ -170,6 +184,9 @@ class Matrix {
             0, 1, 0, y,
             0, 0, 1, z,
             0, 0, 0, 1]);
+
+        console.log(t);
+        console.log(this.mult(t));
 
         return this.mult(t);
     }
@@ -194,7 +211,7 @@ class Matrix {
         let s = Math.sin(theta);
 
         let rx = new Matrix([1, 0, 0, 0,
-            0, c, -s, 0, 0,
+            0, c, -s, 0,
             0, s, c, 0,
             0, 0, 0, 1]);
 
