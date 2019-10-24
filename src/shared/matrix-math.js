@@ -1,5 +1,6 @@
 /* eslint no-unused-vars: ["warn", {"varsIgnorePattern": "(Matrix)|(Vector)|(Camera)"}] */
 
+
 /**
  * Represents a 4x4 matrix suitable for performing transformations
  * on a vector of homogeneous coordinates.
@@ -45,9 +46,22 @@ class Matrix {
      */
     constructor(values = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]) {
         // TODO
-        // this.mat = values;
-        this.mat = this.transpose(values);
-        
+        let temp = [];
+        if (values.length < 16) {
+            console.warn("Matrix expected 16 values, adding values to matrix");
+            for (let i = values.length; i < 15; i++) {
+                temp[i] = 0;
+            }
+        } else if (values.length > 16) {
+            console.warn("More values than expected, trimming to 16");
+            for (let i = 0; i < 15; i++) {
+                temp[i] = values[i];
+            }
+        } else {
+            temp = values;
+        }
+        this.mat = this.transpose(temp);
+
     }
 
     /**
@@ -64,10 +78,12 @@ class Matrix {
     /**
      * Returns a new matrix that is a copy of the current one
      * Except the values have been transposed
+     * @param {values []} values A list representing a matrix to be transposed
      *
-     * @return {values []} A copy matrix with its values transposed
+     * @return {values []} A list with reordered indices
      */
     transpose(values) {
+        // Copy the current matrix into a new one
         let newMat = values.slice(0);
 
         // Reorder Indices
@@ -93,6 +109,8 @@ class Matrix {
      *
      * @param {number} r Row number (0-3) of value in the matrix.
      * @param {number} c Column number (0-3) of value in the matrix.
+     *
+     * @return {number} The values stored at the index of the matrix
      */
     getValue(r, c) {
         // TODO
@@ -133,23 +151,12 @@ class Matrix {
      * @return {Matrix} Product of the current matrix and the parameter.
      */
     mult(matB) {
-        // TODO
-        let values = [];
+        // Vert stores the new data to put in the new matrix
         let vert = 0;
+        // A new matrix to modify and then return
         let mMat = new Matrix();
-        // console.log("Mult is being called");
 
-        // Loop Through and multiply
-        // for (let t = 0; t < 15; t += 4) {
-        //     for (let i = 0; i < 4; i++) {
-        //         for (let z = 0; z < 4; z++) {
-        //             vert += this.mat[z + t] * matB.mat[z * 4 + i];
-        //         }
-        //         values.push(vert);
-        //         vert = 0;
-        //     }
-        // }
-
+        // Mutliplication loop
         for (let t = 0; t < 4; t++) {
             for (let i = 0; i < 4; i++) {
                 for (let z = 0; z < 4; z++) {
@@ -160,7 +167,6 @@ class Matrix {
                 vert = 0;
             }
         }
-       
 
         return mMat;
     }
@@ -178,15 +184,13 @@ class Matrix {
      * @return {Matrix} Result of translating the current matrix.
      */
     translate(x, y, z) {
-        // TODO
+        // Create the translation matrix
 
         let t = new Matrix([1, 0, 0, x,
             0, 1, 0, y,
             0, 0, 1, z,
             0, 0, 0, 1]);
 
-        console.log(t);
-        console.log(this.mult(t));
 
         return this.mult(t);
     }
@@ -368,10 +372,15 @@ class Vector {
      * @param {number[]} values (optional) An array of floating point values.
      *
      */
-    constructor(values) {
+    constructor(values = [0, 0, 0]) {
         // TODO
 
         if (values !== "undefined") {
+            this.x = values[0];
+            this.y = values[1];
+            this.z = values[2];
+        } else if (values.length > 3) {
+            console.warn("Vector expected 3 values, " + values.length + " were passed");
             this.x = values[0];
             this.y = values[1];
             this.z = values[2];

@@ -46,9 +46,9 @@
             <!-- location sliders -->
             <div class="controlGroup">
                 <div>Location</div>
-                <div><span class="label">x: </span><input id="xtrans" type="range" min="-0.75" max="0.75" step="0.05" value="0.0" onchange="translate()" /></div>
-                <div><span class="label">y: </span><input id="ytrans" type="range" min="-0.75" max="0.75" step="0.05" value="0.0" onchange="translate()" /></div>
-                <div><span class="label">z: </span><input id="ztrans" type="range" min="-0.75" max="0.75" step="0.05" value="0.0" onchange="translate()" /></div>
+                <div><span class="label">x: </span><input id="xtrans" type="range" min="-0.75" max="0.75" step="0.05" value="0.0" onchange="trans()" /></div>
+                <div><span class="label">y: </span><input id="ytrans" type="range" min="-0.75" max="0.75" step="0.05" value="0.0" onchange="trans()" /></div>
+                <div><span class="label">z: </span><input id="ztrans" type="range" min="-0.75" max="0.75" step="0.05" value="0.0" onchange="trans()" /></div>
             </div>
             <!-- scale sliders -->
             <div class="controlGroup">
@@ -83,12 +83,12 @@
         /**
          * Processes changes to the translation sliders.
          */
-        function translate() {
+        function trans() {
             let x = document.getElementById("xtrans");
             let y = document.getElementById("ytrans");
             let z = document.getElementById("ztrans");
             
-            data.cube.translate(x.value, y.value, z.value);
+            data.cube.trans(x.value, y.value, z.value);
         }
 
         /**
@@ -124,7 +124,7 @@
             for (let i = 0; i < ranges.length; i++) {
                 ranges[i].value = Math.trunc((Number.parseFloat(ranges[i].max) + Number.parseFloat(ranges[i].min)) / 2);
             }
-            translate();
+            trans();
             rotate();
             scale();
             data.anglex = 0;
@@ -166,7 +166,7 @@
             gl.clearDepth(1);
             gl.enable(gl.DEPTH_TEST);
 
-            // gl.enable(gl.CULL_FACE);
+            gl.enable(gl.CULL_FACE);
 
             let transformMatrix = new Matrix();
             transformMatrix = transformMatrix.rotateX(-35.264);

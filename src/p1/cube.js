@@ -114,7 +114,6 @@ class Cube {
         this.world = new Matrix().scale(0.5, 0.5, 0.5).translate(-0.5, -0.5, -0.5); // TODO modify this line
 
 
-
         // create identity matrices for each transformation
         this.scaleMatrix = new Matrix(); // scale matrix
         this.rotateMatrix = new Matrix(); // rotate matrix
@@ -176,13 +175,13 @@ class Cube {
         gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(vert);
         // TODO bind verticesBuffer to the cubeLocation attribute (ARRAY_BUFFER)
-     
+
         // TODO bind colorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
         gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
         let col = gl.getAttribLocation(this.program, "cubeColor");
         gl.vertexAttribPointer(col, 4, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(col);
-        
+
 
         gl.useProgram(this.program);
 
@@ -223,7 +222,7 @@ class Cube {
      */
     scale(sx, sy, sz) {
         // TODO
-        // this.model = 
+        this.scaleMatrix = new Matrix().scale(sx, sy, sz);
     }
 
     /**
@@ -236,6 +235,11 @@ class Cube {
      */
     rotate(xtheta, ytheta, ztheta) {
         // TODO
+        let x = new Matrix().rotateX(xtheta);
+        let y = new Matrix().rotateY(ytheta);
+        let z = new Matrix().rotateZ(ztheta);
+
+        this.rotateMatrix = z.mult(y.mult(x));
     }
 
     /**
@@ -246,8 +250,11 @@ class Cube {
      * @param {number} ty Amount to translate the cube in the y direction.
      * @param {number} tz Amount to translate the cube in the z direction.
      */
-    translate(tx, ty, tz) {
+    trans(tx, ty, tz) {
         // TODO
+        let t = new Matrix().translate(tx, ty, tz);
+
+        this.translateMatrix = t;
     }
 
     /**
