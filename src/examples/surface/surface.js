@@ -71,8 +71,8 @@ class Surface {
         this.triprogram = createProgram(gl, triVertex, triFragment);
         // vertices
         // TODO create the length of the arrays
-        this.vertices = new Float32Array(/* TODO */);
-        this.triangles = new Uint16Array(/* TODO */);
+        this.vertices = new Float32Array(width * height * 6);
+        this.triangles = new Uint16Array((width + 1) * height * 2);
 
         this.width = width;
         this.height = height;
@@ -84,9 +84,50 @@ class Surface {
         let xMin = -1 * Math.PI;
         let zMin = -1 * Math.PI;
         let range = 2 * Math.PI;
+        let pos = 0;
+        let tpos = 0;
 
         // TODO draw lines in both directions
         // x, z is split by width and height
+        for (let r = 0; r < width; r++) {
+            for (let c = 0; c < height; c++) {
+                x = range / width * c + xMin;
+                z = range / height * r + zMin;
+                // Calc y
+                y = Math.cos(x) * Math.cos(2 * z);
+                // Store the point
+                this.vertices[pos] = x;
+                this.vertices[pos + 1] = y;
+                this.vertices[pos + 2] = z;
+                
+
+                // add two vertices
+                if (r !== 0) {
+                    // The current vertex
+                    this.triangles[tpos + 1] = pos / 3;
+                    // The vertex in the previous row
+                    this.triangles[tpos] = pos / 3 - width;
+                    tpos += 2;
+                }
+
+                // Update the position
+                pos += 3;
+               
+            }
+        }
+        for (let c = 0; c < width; c++) {
+            for (let r = 0; r < height; r++) {
+                x = range / width * c + xMin;
+                z = range / height * r + zMin;
+                // Calc y
+                y = Math.cos(x) * Math.cos(2 * z);
+                // Store the point
+                this.vertices[pos] = x;
+                this.vertices[pos + 1] = y;
+                this.vertices[pos + 2] = z;
+                pos += 3;
+            }
+        }
         // y = cos(x) * cos(2z)
         // put each vertex in this.vertices
         // TODO store vertex position in this.triangles
@@ -152,7 +193,16 @@ class Surface {
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
         // TODO draw lines
-        
+        // Rows
+        for (let r = 0; r < this.height; r++) {
+            gl.drawArrays(gl.LINE_STRIP, r * this.width, this.width);
+        }
+
+        // Columns
+        for (let c = 0; c < this.height; c++) {
+            gl.drawArrays(gl.LINE_STRIP, c * this.height + this.width * this.height, this.height);
+        }
+
 
 
         // triangles
@@ -173,9 +223,10 @@ class Surface {
         gl.uniform4fv(backColor, new Float32Array([0.5, 0.5, 0.7, 1]));
 
         // TODO draw triangles
-        
-        
-
+        // triangle rows
+        for (let r = 0; r < this.height; r++) {
+            gl.drawElements(gl.TRIANGLE_STRIP, this.width * 2, gl.UNSIGNED_SHORT, r * this.width * 4);
+        }
 
 
     }

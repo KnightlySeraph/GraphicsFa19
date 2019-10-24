@@ -293,6 +293,11 @@ class Matrix {
      */
     rotate(thetax, thetay, thetaz, x = 0, y = 0, z = 0) {
         // TODO
+        let xr = this.rotateX(thetax);
+        let yr = this.rotateY(thetay);
+        let zr = this.rotateZ(thetaz);
+
+        return this.mult(xr).mult(yr).mult(zr);
     }
 
     /**
