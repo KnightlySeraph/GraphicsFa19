@@ -59,4 +59,41 @@ describe("Vector Constructor", function() {
 
 });
 
+describe("Vector Functions", function() {
+    it("Cross Product Zeros", function() {
+        let a = new Vector([1, 3, 4, 5]);
+        let b = new Vector([0, 0, 0, 0]);
+        let c = a.crossProduct(b);
+        testVector(c, [0, 0, 0, 0]);
+    });
+
+    it("Cross Product", function() {
+        let a = new Vector([1, 3, 4]);
+        let b = new Vector([2, 3, 2]);
+        let c = a.crossProduct(b);
+        testVector(c, [-6, 6, -3, 0]);
+    });
+
+    it("Dot Product Zeroes", function() {
+        let a = new Vector([1, 2, 3]);
+        let b = new Vector([0, 0, 0]);
+        let c = a.dotProduct(b);
+        expect(c).toBe(0);
+    });
+
+    it("Dot Product", function() {
+        let a = new Vector([1, 3, 4]);
+        let b = new Vector([2, 3, 2]);
+        let c = a.dotProduct(b);
+        expect(c).toBe(19);
+    });
+
+    it("Add zero", function() {
+        let a = new Vector([3, 4, 5]);
+        let b = new Vector([0, 0, 0]);
+        let c = a.add(b);
+        expect(c).toBe(12);
+    });
+});
+
 

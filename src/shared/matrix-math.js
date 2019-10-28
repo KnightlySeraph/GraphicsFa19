@@ -402,7 +402,7 @@ class Vector {
      */
     crossProduct(v) {
         // TODO
-        return Vector([this.y * v.z - this.z * v.y, this.z * v.x - this.x * v.z, this.x * v.y - this.y * v.x]);
+        return new Vector([this.y * v.z - this.z * v.y, this.z * v.x - this.x * v.z, this.x * v.y - this.y * v.x]);
     }
 
     /**
@@ -431,8 +431,10 @@ class Vector {
      */
     add(v) {
         // TODO
-
-        return Vector([this.x + v.x, this.y + v.y, this.z + v.z]);
+        let vx = this.getX() + v.getX();
+        let vy = this.getY() + v.getY();
+        let vz = this.getZ() + v.getZ();
+        return vx + vy + vz;
     }
 
     /**
@@ -447,7 +449,7 @@ class Vector {
     subtract(v) {
         // TODO
 
-        return Vector([this.x - v.x, this.y - v.y, this.z - v.z]);
+        return new Vector([this.x - v.x, this.y - v.y, this.z - v.z]);
     }
 
     /**
@@ -548,10 +550,114 @@ class Vector {
 }
 
 // TODO for P2 Add the Camera class
+class Camera {
+    constructor () {
+        this.projectionMatrix = new Matrix();
+        this.viewMatrix = new Matrix();
+    }
 
+    /**
+     *
+     * @param {Number} left Left
+     * @param {Number} right Right
+     * @param {Number} bottom Bottom
+     * @param {Number} top Top
+     * @param {Number} near Near
+     * @param {Number} far Far
+     *
+     * @returns {Matrix} Calculated orthogonal matrix
+     */
+    ortho (left, right, bottom, top, near, far) {
+        // Create orthgonal matrix
+        let a = 2 / right - left;
+        let b = -(left + right / right - left);
+        let c = 2 / top - bottom;
+        let d = -(top + bottom / top - bottom);
+        let e = -(2 / far - near);
+        let f = -(far + near / far - near);
+
+        let orthogonal = new Matrix([a, 0, 0, b,
+            0, c, 0, d,
+            0, 0, e, f,
+            0, 0, 0, 1]);
+
+        return orthogonal;
+
+    }
+
+    /**
+     *
+     * @param {Number} left Left
+     * @param {Number} right Right
+     * @param {Number} bottom Bottom
+     * @param {Number} top Top
+     * @param {Number} near Near
+     * @param {Number} far Far
+     *
+     * @return {Matrix} New perspective matrix
+     */
+    frustum (left, right, bottom, top, near, far) {
+        // Create a perspective matrix
+        let a = 2 * near / right - left;
+        let b = right + left / right - left;
+        let c = 2 * near / top - bottom;
+        let d = top + bottom / top - bottom;
+        let e = -(far + near / far - near);
+        let f = -2 * far * near / far - near;
+
+        let perspective = new Matrix([a, 0, b, 0,
+            0, c, d, 0,
+            0, 0, e, f,
+            0, 0, -1, 0]);
+
+        return perspective;
+
+    }
+
+    /**
+     *
+     * @param {Vector} loc The eye location
+     * @param {Vector} look The location being looked at
+     * @param {Vector} upVector The up vector
+     *
+     * @return {Matrix} A modified view matrix
+     */
+    lookAt (loc, look, upVector) {
+
+        let n = look.subtract(loc) / Math.abs(look.subtract(loc));
+
+        return this.viewMatrix;
+    }
+
+    /**
+     * @param {Vector} loc Location of the camera
+     * @param {Vector} vnVector The view normal vector
+     * @param {Vector} upVector The view up vector
+     *
+     * @return {Matrix} A calculated view matrix
+     */
+    viewPoint (loc, vnVector, upVector) {
+
+        return this.viewMatrix;
+    }
+
+    /**
+     * @return {Matrix} The view matrix of the camera
+     */
+    getView () {
+        return this.viewMatrix;
+    }
+
+    /**
+     * @return {Matrix} The projection matrix of the camera
+     */
+    getProjection () {
+        return this.projectionMatrix;
+    }
+}
 // allows the class to be send during testing
 module.exports = {
-    // Camera: Camera,  // TODO for P2 uncomment this line
+    Camera: Camera,
     Matrix: Matrix,
     Vector: Vector
 };
