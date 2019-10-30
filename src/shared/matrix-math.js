@@ -504,7 +504,7 @@ class Vector {
     scale(s) {
         // TODO
 
-        return Vector([this.x * s, this.y * s, this.z * s]);
+        return new Vector([this.x * s, this.y * s, this.z * s]);
     }
 
     /**
@@ -588,7 +588,9 @@ class Camera {
             0, 0, e, f,
             0, 0, 0, 1]);
 
-        return orthogonal;
+        this.projectionMatrix = orthogonal;
+
+        return this.projectionMatrix;
 
     }
 
@@ -617,7 +619,9 @@ class Camera {
             0, 0, e, f,
             0, 0, -1, 0]);
 
-        return perspective;
+        this.projectionMatrix = perspective;
+
+        return this.projectionMatrix;
 
     }
 

@@ -94,7 +94,10 @@
             
             // change camera
             info.camera.lookAt(eye, new Vector([0, 0, 0]), new Vector([0, 1, 0]));
-            render(info);            
+            render(info);    
+            console.log("Projection and View from the move camera function");
+            console.log(info.camera.getProjection());
+            console.log(info.camera.getView());        
         }
 
         /**
@@ -206,7 +209,9 @@
                 info.camera.ortho(-20 * aspect, 20 * aspect, -20, 20, 10, 50);
             } else {
                 info.camera.frustum(-20 * aspect, 20 * aspect, -20, 20, 10, 50);
-            }        
+            }   
+            console.log("Projection Matrix from the setPerspective function");
+            console.log(info.camera.getProjection());     
             // console.log(info.proj)    
             render(info);
         }
@@ -230,15 +235,15 @@
          * 
          */
         function addShapes(info, extra) {
-            let c = new Cube();
+            let c = new Cube(info.glContext);
             c.move(5, 0, -5);
             c.resize(5, 5, 5);
             
-            let t = new Tetra();
+            let t = new Tetra(info.glContext);
             t.move(-5, 0, -5);
             t.resize(5, 5, 5);
             
-            let c2 = new Cube();
+            let c2 = new Cube(info.glContext)
             c2.move(-16, 0, 5);
             c2.resize(5, 5, 5);
             c2.orient(90, 45, 0);
@@ -248,9 +253,9 @@
             for (let i = 0; i < extra; i++) {
                 let s = null;
                 if (Math.floor(randRange(0, 2)) === 0) {
-                    s = new Cube();
+                    s = new Cube(info.glContext);
                 } else {
-                    s = new Tetra();
+                    s = new Tetra(info.glContext);
                 }
                 s.move(randRange(-10, 10), randRange(-10, 10), randRange(-10, 10));
                 s.resize(randRange(3, 7), randRange(3, 7), randRange(3, 7));
@@ -284,23 +289,23 @@
                 phi: 0,
                 viewDistance: 30
             };
+            console.log(d.camera.getProjection());
+            console.log(d.camera.getView());
 
             setPerspective(d);
 
             gl.clearColor(1, 1, 1, 1);
             gl.clearDepth(1);
             gl.enable(gl.DEPTH_TEST);
-            
             gl.enable(gl.CULL_FACE);
             gl.cullFace(gl.BACK);
 
             gl.enable(gl.POLYGON_OFFSET_FILL);
             gl.polygonOffset(1, 0.01);
-
             addShapes(d, 2);
             
             moveCamera(d, d.theta, d.phi);
-        
+        ;
             return d;
         }
         
