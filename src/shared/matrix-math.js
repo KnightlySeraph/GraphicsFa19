@@ -466,7 +466,7 @@ class Vector {
         // TODO
         let divisor = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
         if (divisor !== 0) {
-            return Vector([this.x / divisor, this.y / divisor, this.z / divisor]);
+            return new Vector([this.x / divisor, this.y / divisor, this.z / divisor]);
         } else {
             console.error("Cannot divide by zero");
         }
@@ -483,6 +483,13 @@ class Vector {
         return Math.abs(Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2)));
     }
 
+    /**
+     *@return {number} The magnitude to the vector
+     */
+    mag() {
+        let magnitude = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+        return magnitude;
+    }
     /**
      * Scales the current vector by amount s and returns a
      * new Vector that is the result.
@@ -623,8 +630,33 @@ class Camera {
      * @return {Matrix} A modified view matrix
      */
     lookAt (loc, look, upVector) {
+        // Set up the n vector
+        let mag = look.subtract(loc);
+        mag = mag.mag();
+        mag = 1 / mag;
+        let n = look.subtract(loc).scale(mag);
 
-        let n = look.subtract(loc) / Math.abs(look.subtract(loc));
+        // Set up U vector
+        let vnMag = upVector.crossProduct(n).mag();
+        vnMag = 1 / vnMag;
+        let u = upVector.crossProduct(n).scale(vnMag);
+
+        // Set up v vector
+        let nuMag = n.crossProduct(u).mag();
+        nuMag = 1 / nuMag;
+        let v = n.crossProduct(u).scale(nuMag);
+
+        // Create the rotation matrix
+        let rot = new Matrix([u.getX(), u.getY(), u.getZ(), 0,
+            v.getX(), v.getY(), v.getZ(), 0,
+            n.getX(), n.getY(), n.getZ(), 0,
+            0, 0, 0, 1]);
+
+        // Create a translation matrix
+        let trans = new Matrix().translate(loc.getX(), loc.getY(), loc.getZ());
+
+        // Set the new view matrix
+        this.viewMatrix = rot.mult(trans);
 
         return this.viewMatrix;
     }
@@ -637,6 +669,30 @@ class Camera {
      * @return {Matrix} A calculated view matrix
      */
     viewPoint (loc, vnVector, upVector) {
+
+        // Create n prime
+        let nprime = vnVector.normalize();
+
+        // Create v vector
+        let v = upVector.subtract(upVector.dotProduct(nprime).dotProduct(nprime));
+        // create v prime
+        let vprime = v.normalize();
+        // create u prime
+        let uprime = vprime.crossProduct(nprime);
+
+        // Create the rotation matrix
+        let rot = new Matrix([uprime.getX(), uprime.getY(), uprime.getZ(), 0,
+            vprime.getX(), vprime.getY(), vprime.getZ(), 0,
+            nprime.getX(), nprime.getY(), nprime.getZ(), 0,
+            0, 0, 0, 1]);
+
+        // Create a translation matrix
+        let trans = new Matrix().translate(loc.getX(), loc.getY(), loc.getZ());
+
+        // Set the new view matrix
+        this.viewMatrix = rot.mult(trans);
+
+
 
         return this.viewMatrix;
     }
