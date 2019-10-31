@@ -9,11 +9,12 @@ const cubeVertex = `
 
     uniform mat4 model;
     uniform mat4 projection;
+    uniform mat4 view;
 
     varying lowp vec4 cColor;
 
     void main() {
-       gl_Position = projection * model * cubeLocation;
+       gl_Position = projection * model * view * cubeLocation;
        cColor = cubeColor;
     }
 
@@ -181,7 +182,7 @@ class Cube {
      * @param {WebGLRenderingContext} gl WebGL context
      * @param {Matrix} projection Projection matrix
      */
-    render(gl, projection) {
+    render(gl, projection, view) {
         if (!this.buffered) {
             this.bufferData(gl);
         }
@@ -210,6 +211,10 @@ class Cube {
 
         let proj = gl.getUniformLocation(this.program, "projection");
         gl.uniformMatrix4fv(proj, false, projection.getData());
+
+        // Bind the view uniform
+        let v = gl.getUniformLocation(this.program, "view");
+        gl.uniformMatrix4fv(v, false, view.getData());
 
 
         if (!this.wire) {
@@ -502,7 +507,7 @@ class Tetra {
      * @param {WebGLRenderingContext} gl WebGL context
      * @param {Matrix} projection Projection matrix
      */
-    render(gl, projection) {
+    render(gl, projection, view) {
         if (!this.buffered) {
             this.bufferData(gl);
         }
@@ -531,6 +536,10 @@ class Tetra {
 
         let proj = gl.getUniformLocation(this.program, "projection");
         gl.uniformMatrix4fv(proj, false, projection.getData());
+
+        // Bind the view uniform
+        let v = gl.getUniformLocation(this.program, "view");
+        gl.uniformMatrix4fv(v, false, view.getData());
 
 
         if (!this.wire) {

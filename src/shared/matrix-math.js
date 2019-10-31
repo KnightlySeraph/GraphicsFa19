@@ -427,14 +427,16 @@ class Vector {
      *
      * @param {Vector} v Vector to add with the current vector.
      *
-     * @return {number} The sum of the current vector and the parameter.
+     * @return {Vector} The sum of the current vector and the parameter.
      */
     add(v) {
         // TODO
-        let vx = this.getX() + v.getX();
-        let vy = this.getY() + v.getY();
-        let vz = this.getZ() + v.getZ();
-        return vx + vy + vz;
+        // let vx = this.getX() + v.getX();
+        // let vy = this.getY() + v.getY();
+        // let vz = this.getZ() + v.getZ();
+        // return vx + vy + vz;
+
+        return new Vector([this.x + v.getX(), this.y + v.getY(), this.z + v.getZ()]);
     }
 
     /**
@@ -449,7 +451,18 @@ class Vector {
     subtract(v) {
         // TODO
 
-        return new Vector([this.x - v.x, this.y - v.y, this.z - v.z]);
+        return new Vector([this.x - v.getX(), this.y - v.getY(), this.z - v.getZ()]);
+    }
+
+    /**
+     *
+     * @param {Vector} v The divisor vector
+     *
+     * @return {Vector} The divided vector
+     */
+    divide(v) {
+        let margin = 0.0000001;
+        return new Vector([this.x / v.getX() + margin, this.y / v.getY() + margin, this.z / v.getZ() + margin]);
     }
 
     /**
@@ -489,6 +502,13 @@ class Vector {
     mag() {
         let magnitude = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
         return magnitude;
+    }
+
+    /**
+     * @return {Vector} Absolute value of the current vector
+     */
+    abs() {
+        return new Vector([Math.abs(this.getX()), Math.abs(this.getY()), Math.abs(this.getZ())]);
     }
     /**
      * Scales the current vector by amount s and returns a
@@ -634,21 +654,25 @@ class Camera {
      * @return {Matrix} A modified view matrix
      */
     lookAt (loc, look, upVector) {
+        console.log("Using lookAt function");
+        console.log(loc);
         // Set up the n vector
-        let mag = look.subtract(loc);
-        mag = mag.mag();
-        mag = 1 / mag;
-        let n = look.subtract(loc).scale(mag);
+        let n = loc.subtract(look);
+        let tempN = n.abs();
+        console.log(tempN);
+        n = n.divide(tempN);
+        console.log(n);
+        n = n.normalize();
+        console.log(n);
 
         // Set up U vector
-        let vnMag = upVector.crossProduct(n).mag();
-        vnMag = 1 / vnMag;
-        let u = upVector.crossProduct(n).scale(vnMag);
+        let u = upVector.crossProduct(n);
+        u = u.divide(upVector.crossProduct(n).abs());
+        u = u.normalize();
 
         // Set up v vector
-        let nuMag = n.crossProduct(u).mag();
-        nuMag = 1 / nuMag;
-        let v = n.crossProduct(u).scale(nuMag);
+        let v = n.crossProduct(u);
+        v = v.divide(n.crossProduct(u).abs());
 
         // Create the rotation matrix
         let rot = new Matrix([u.getX(), u.getY(), u.getZ(), 0,
