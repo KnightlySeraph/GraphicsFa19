@@ -4,7 +4,7 @@
     <title>View</title>
     <script src="../shared/program.js"></script>
     <script src="../shared/axis.js"></script>
-    <script src="../shared/matrix-math.js"></script>    
+    <script src="../shared/matrix-math.js"></script>
     <script src="shapes.js"></script>
     <style type="text/css">
         canvas {
@@ -22,22 +22,13 @@
             padding: 0px 15px;
         }
         #graphics {
-            width: 1000px;
+            width: 950px;
             margin: 0 auto;
-        }
-        .controlGroup {
-            margin-top: 15px;
         }
         button {
             width: 115px;
             margin: 15px 0px 0px 0px;
         }
-        table {
-            margin-top: 15px;
-            border-right: 1px solid black;
-            border-left: 1px solid black;
-        }
-        
     </style>
 </head>
 <body>
@@ -55,15 +46,7 @@
                     <label for="perspective">Perspective</label>
                 </div>                       
             </div>            
-            <div><button id="resetButton" onclick="reset()">Reset</button></div>      
-            <div class="controlGroup">
-                <div>Projection Matrix</div>
-                <div id="projectionMatrix"></div>
-            </div>
-            <div class="controlGroup">
-                <div>View Matrix</div>
-                <div id="viewMatrix"></div>
-            </div>      
+            <div><button id="resetButton" onclick="reset()">Reset</button></div>            
         </div>
         <canvas id="drawArea"></canvas>
     </div>
@@ -111,10 +94,10 @@
             
             // change camera
             info.camera.lookAt(eye, new Vector([0, 0, 0]), new Vector([0, 1, 0]));
-            // console.log("camera", eye);
-            document.getElementById("viewMatrix").innerHTML = info.camera.getView().asHTML();
-            
-            render(info);            
+            render(info);    
+            console.log("Projection and View from the move camera function");
+            console.log(info.camera.getProjection());
+            console.log(info.camera.getView());        
         }
 
         /**
@@ -226,9 +209,10 @@
                 info.camera.ortho(-20 * aspect, 20 * aspect, -20, 20, 10, 50);
             } else {
                 info.camera.frustum(-20 * aspect, 20 * aspect, -20, 20, 10, 50);
-            } 
-            document.getElementById("projectionMatrix").innerHTML = info.camera.getProjection().asHTML();       
-            //console.log("proj", info.camera.getProjection());    
+            }   
+            console.log("Projection Matrix from the setPerspective function");
+            console.log(info.camera.getProjection());     
+            // console.log(info.proj)    
             render(info);
         }
         
@@ -254,13 +238,12 @@
             let c = new Cube(info.glContext);
             c.move(5, 0, -5);
             c.resize(5, 5, 5);
-            // console.log(c.getModel().getData());
-            // console.log(info.camera.getProjection());
+            
             let t = new Tetra(info.glContext);
             t.move(-5, 0, -5);
             t.resize(5, 5, 5);
             
-            let c2 = new Cube(info.glContext);
+            let c2 = new Cube(info.glContext)
             c2.move(-16, 0, 5);
             c2.resize(5, 5, 5);
             c2.orient(90, 45, 0);
@@ -306,23 +289,23 @@
                 phi: 0,
                 viewDistance: 30
             };
+            console.log(d.camera.getProjection());
+            console.log(d.camera.getView());
 
             setPerspective(d);
 
             gl.clearColor(1, 1, 1, 1);
             gl.clearDepth(1);
             gl.enable(gl.DEPTH_TEST);
-            
             gl.enable(gl.CULL_FACE);
             gl.cullFace(gl.BACK);
 
             gl.enable(gl.POLYGON_OFFSET_FILL);
             gl.polygonOffset(1, 0.01);
-
             addShapes(d, 2);
             
             moveCamera(d, d.theta, d.phi);
-        
+        ;
             return d;
         }
         

@@ -462,7 +462,7 @@ class Vector {
      */
     divide(v) {
         let margin = 0.0000001;
-        return new Vector([this.x / v.getX() + margin, this.y / v.getY() + margin, this.z / v.getZ() + margin]);
+        return new Vector([this.x / (v.getX() + margin), this.y / (v.getY() + margin), this.z / (v.getZ() + margin)]);
     }
 
     /**
@@ -661,6 +661,7 @@ class Camera {
         let tempN = n.abs();
         console.log(tempN);
         n = n.divide(tempN);
+        console.log("Division");
         console.log(n);
         n = n.normalize();
         console.log(n);
