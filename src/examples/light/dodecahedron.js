@@ -24,14 +24,23 @@ const decFragment = `
     precision mediump float;
     
     // add normal, light, color and model uniform 
+    uniform vec4 ambientLight;  // Light * material
+    uniform vec4 diffuseLight;  // light * material
+
+    uniform vec4 lightPos;
+    uniform vec4 normal;
       
 
     void main() {
         // compute the normalized vector
+
         // get the dot of the norm and the light
+        vec4 light = normalize(-lightPos);
+        float diffuseDot = max(dot(light, normal), 0.0);
         
         // update color
-        gl_FragColor = vec4(0.5, 0.5, 0.5, 1.0);       
+        gl_FragColor = ambientLight + diffuseLight * diffuseDot;
+        gl_FragColor.a = 1.0;       
     }
 `;
 
@@ -225,6 +234,15 @@ class Dodecahedron {
         let matModel = gl.getUniformLocation(this.decProgram, "model");
         let matView = gl.getUniformLocation(this.decProgram, "view");
 
+        // Fragment shader uniforms
+        let ambient = gl.getUniformLocation(this.decProgram, "ambientLight");
+        let ambColor = this.multArray(this.ambientColor, this.ambientMaterial);
+
+        let diffuse = gl.getUniformLocation(this.decProgram, "diffuseLight");
+        let diffColor = this.multArray(this.diffuseColor, this.diffuseMaterial);
+        let lightPos = gl.getUniformLocation(this.decProgram, "lightPos");
+        let normal = gl.getUniformLocation(this.decProgram, "normal");
+
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
         gl.vertexAttribPointer(verLoc, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(verLoc);
@@ -234,6 +252,13 @@ class Dodecahedron {
         gl.uniformMatrix4fv(matProjection, false, projection.getData());
         gl.uniformMatrix4fv(matModel, false, this.getModel().getData());
         gl.uniformMatrix4fv(matView, false, view.getData());
+
+        // Fragment shader bindings
+        gl.uniform4fv(ambient, ambColor);
+        gl.uniform4fv(diffuse, diffColor);
+        // TODO
+        // gl.uniform4fv()
+
 
         // show normals
         this.edges = new Float32Array(72);
