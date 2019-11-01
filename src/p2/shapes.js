@@ -1,5 +1,7 @@
 /* global Matrix createProgram */
-/* eslint no-unused-vars: ["warn", { "varsIgnorePattern": "Cube" }] */
+/* eslint no-unused-vars: ["warn", { "varsIgnorePattern": "Cube"}] */
+/* eslint no-unused-vars: ["warn", { "varsIgnorePattern": "Tetra"}] */
+
 /**
  * vertex shader
  */
@@ -333,11 +335,18 @@ class Cube {
     }
 
     orient (tx, ty, tz) {
+        let rot = new Matrix().rotate(tx, ty, tz);
+        this.rotateMatrix = rot;
 
+        // Update the values of orientation
+        this.orientation.x = tx;
+        this.orientation.y = ty;
+        this.orientation.z = tz;
     }
 
     getOrientation () {
-
+        let tempList = [this.orientation.x, this.orientation.y, this.orientation.z];
+        return tempList;
     }
 
     /**

@@ -596,12 +596,12 @@ class Camera {
      */
     ortho (left, right, bottom, top, near, far) {
         // Create orthgonal matrix
-        let a = 2 / right - left;
-        let b = -(left + right / right - left);
-        let c = 2 / top - bottom;
-        let d = -(top + bottom / top - bottom);
-        let e = -(2 / far - near);
-        let f = -(far + near / far - near);
+        let a = 2 / (right - left);
+        let b = -((left + right) / (right - left));
+        let c = 2 / (top - bottom);
+        let d = -((top + bottom) / (top - bottom));
+        let e = -(2 / (far - near));
+        let f = -((far + near) / (far - near));
 
         let orthogonal = new Matrix([a, 0, 0, b,
             0, c, 0, d,
@@ -627,12 +627,12 @@ class Camera {
      */
     frustum (left, right, bottom, top, near, far) {
         // Create a perspective matrix
-        let a = 2 * near / right - left;
-        let b = right + left / right - left;
-        let c = 2 * near / top - bottom;
-        let d = top + bottom / top - bottom;
-        let e = -(far + near / far - near);
-        let f = -2 * far * near / far - near;
+        let a = 2 * near / (right - left);
+        let b = (right + left) / (right - left);
+        let c = 2 * near / (top - bottom);
+        let d = (top + bottom) / (top - bottom);
+        let e = -((far + near) / (far - near));
+        let f = -2 * far * near / (far - near);
 
         let perspective = new Matrix([a, 0, b, 0,
             0, c, d, 0,
@@ -654,26 +654,32 @@ class Camera {
      * @return {Matrix} A modified view matrix
      */
     lookAt (loc, look, upVector) {
-        console.log("Using lookAt function");
-        console.log(loc);
-        // Set up the n vector
+        // Subtracting the at from the eye
         let n = loc.subtract(look);
+        // Get the absolute value of n
         let tempN = n.abs();
-        console.log(tempN);
+        // Dividing the n var by the abs of n
         n = n.divide(tempN);
-        console.log("Division");
-        console.log(n);
-        n = n.normalize();
-        console.log(n);
 
         // Set up U vector
         let u = upVector.crossProduct(n);
-        u = u.divide(upVector.crossProduct(n).abs());
-        u = u.normalize();
+        // Get absolute value of U
+        let tempU = u.abs();
+        // Divide by abs of u
+        u = u.divide(tempU);
 
         // Set up v vector
         let v = n.crossProduct(u);
-        v = v.divide(n.crossProduct(u).abs());
+        // Get absolute value of v
+        let tempV = v.abs();
+        // Divide by the abs of v
+        v = v.divide(tempV);
+
+
+        // Normalize the vectors
+        n = n.normalize();
+        u = u.normalize();
+        v = v.normalize();
 
         // Create the rotation matrix
         let rot = new Matrix([u.getX(), u.getY(), u.getZ(), 0,
@@ -682,10 +688,10 @@ class Camera {
             0, 0, 0, 1]);
 
         // Create a translation matrix
-        let trans = new Matrix().translate(loc.getX(), loc.getY(), loc.getZ());
+        let trans = new Matrix().translate(loc.getX(), loc.getY(), -loc.getZ());
 
         // Set the new view matrix
-        this.viewMatrix = rot.mult(trans);
+        this.viewMatrix = trans.mult(rot);
 
         return this.viewMatrix;
     }
@@ -698,7 +704,7 @@ class Camera {
      * @return {Matrix} A calculated view matrix
      */
     viewPoint (loc, vnVector, upVector) {
-
+        console.log("Ohh, look at me the view point function getting used!");
         // Create n prime
         let nprime = vnVector.normalize();
 
