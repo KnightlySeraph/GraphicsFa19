@@ -656,25 +656,12 @@ class Camera {
     lookAt (loc, look, upVector) {
         // Subtracting the at from the eye
         let n = loc.subtract(look);
-        // Get the absolute value of n
-        let tempN = n.abs();
-        // Dividing the n var by the abs of n
-        n = n.divide(tempN);
 
         // Set up U vector
         let u = upVector.crossProduct(n);
-        // Get absolute value of U
-        let tempU = u.abs();
-        // Divide by abs of u
-        u = u.divide(tempU);
 
         // Set up v vector
         let v = n.crossProduct(u);
-        // Get absolute value of v
-        let tempV = v.abs();
-        // Divide by the abs of v
-        v = v.divide(tempV);
-
 
         // Normalize the vectors
         n = n.normalize();
@@ -688,10 +675,10 @@ class Camera {
             0, 0, 0, 1]);
 
         // Create a translation matrix
-        let trans = new Matrix().translate(loc.getX(), loc.getY(), -loc.getZ());
+        let trans = rot.translate(-loc.getX(), -loc.getY(), -loc.getZ());
 
         // Set the new view matrix
-        this.viewMatrix = trans.mult(rot);
+        this.viewMatrix = trans;
 
         return this.viewMatrix;
     }
