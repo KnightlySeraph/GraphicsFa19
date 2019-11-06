@@ -16,7 +16,7 @@ const cubeVertex = `
     varying lowp vec4 cColor;
 
     void main() {
-       gl_Position = projection * model * view * cubeLocation;
+       gl_Position = projection * view * model * cubeLocation;
        cColor = cubeColor;
     }
 
