@@ -28,4 +28,19 @@ describe("Camera", function() {
             "Calling getView after creating a Camera");
     });
 
+    it("Ortho", function() {
+        let c = new Camera();
+        // Check if the orthogonal matrix returns expected values for these paramters
+        let left = -20;
+        let right = 20;
+        let bottom = -20;
+        let top = 20;
+        let near = 10;
+        let far = 50;
+        c.ortho(left, right, bottom, top, near, far);
+        testMatrix(c.getProjection(),
+            [0.05, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, -0.05, -1.5, 0, 0, 0, 1],
+            "Calling getProjection after setting up an ortho projection");
+    });
+
 });

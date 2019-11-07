@@ -602,6 +602,7 @@ class Camera {
         let d = -((top + bottom) / (top - bottom));
         let e = -(2 / (far - near));
         let f = -((far + near) / (far - near));
+        console.log("Hello");
 
         let orthogonal = new Matrix([a, 0, 0, b,
             0, c, 0, d,
@@ -610,7 +611,7 @@ class Camera {
 
         this.projectionMatrix = orthogonal;
 
-        return this.projectionMatrix;
+        // return this.projectionMatrix;
 
     }
 
