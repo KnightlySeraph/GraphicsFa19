@@ -178,7 +178,7 @@
          * @param {WheelEvent} wEvent Wheel event
          */                
         function zoom(wEvent) {
-            data.viewDistance += wEvent.deltaY;
+            data.viewDistance += wEvent.deltaY / 33;
 
             if (data.viewDistance < 10) {
                 data.viewDistance = 10;
@@ -314,8 +314,8 @@
             gl.clearDepth(1);
             gl.enable(gl.DEPTH_TEST);
             
-            gl.enable(gl.CULL_FACE);
-            gl.cullFace(gl.BACK);
+            // gl.enable(gl.CULL_FACE);
+            // gl.cullFace(gl.BACK);
 
             gl.enable(gl.POLYGON_OFFSET_FILL);
             gl.polygonOffset(1, 0.01);

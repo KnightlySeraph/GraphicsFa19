@@ -34,11 +34,107 @@ const cubeFragment = `
     }
 `;
 
+class Shape {
+    constructor (gl) {
+        this.program = createProgram(gl, cubeVertex, cubeFragment);
+    }
+
+    /**
+     * Creates the buffers for the program. Intended for internal use.
+     *
+     * @param {WebGLRenderingContext} gl WebGL context
+     */
+    bufferData(gl) {
+        this.verticesBuffer = gl.createBuffer();
+        this.trianglesBuffer = gl.createBuffer();
+        this.colorsBuffer = gl.createBuffer();
+        this.edgesBuffer = gl.createBuffer();
+        this.edgeColorsBuffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.triangles, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgesBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.edges, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.edgeColorsBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.edgeColors, gl.STATIC_DRAW);
+
+        this.buffered = true;
+    }
+
+    // render
+    /**
+     * Draws a cube using the provided context and the projection
+     * matrix.
+     *
+     * @param {WebGLRenderingContext} gl WebGL context
+     * @param {Matrix} projection Projection matrix
+     */
+    render(gl, projection, view) {
+        if (!this.buffered) {
+            this.bufferData(gl);
+        }
+
+        // TODO Create bindings between the cube data and the shaders
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        let vert = gl.getAttribLocation(this.program, "cubeLocation");
+        gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vert);
+        // TODO bind verticesBuffer to the cubeLocation attribute (ARRAY_BUFFER)
+
+        // TODO bind colorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
+        let col = gl.getAttribLocation(this.program, "cubeColor");
+        gl.vertexAttribPointer(col, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(col);
+
+
+        gl.useProgram(this.program);
+
+        // TODO bind projection (get its data as an array) to the projection uniform (it is a matrix)
+        // TODO bind this.model (get its data as an array) to the matModel uniform (it is a matrix)
+
+        let model = gl.getUniformLocation(this.program, "model");
+        gl.uniformMatrix4fv(model, false, this.getModel().getData());
+
+        let proj = gl.getUniformLocation(this.program, "projection");
+        gl.uniformMatrix4fv(proj, false, projection.getData());
+
+        // Bind the view uniform
+        let v = gl.getUniformLocation(this.program, "view");
+        gl.uniformMatrix4fv(v, false, view.getData());
+
+
+        if (!this.wire) {
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
+            gl.drawElements(gl.TRIANGLE_STRIP, this.triangles.length, gl.UNSIGNED_BYTE, 0);
+        }
+
+        // wire frame
+        // TODO bind edgeColorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.edgeColorsBuffer);
+        let eCol = gl.getAttribLocation(this.program, "cubeColor");
+        gl.vertexAttribPointer(eCol, 4, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(eCol);
+
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgesBuffer);
+        gl.drawElements(gl.LINES, this.edges.length, gl.UNSIGNED_BYTE, 0);
+    }
+}
+
 /**
  * Creates a cube centered on the origin with a size of 0.5 units. The cube is
  * shaded to show the color gamut.
  */
-class Cube {
+class Cube extends Shape {
     /**
      * Creates a cube.
      *
@@ -46,8 +142,8 @@ class Cube {
      */
     constructor(gl) {
         // shaders
+        super(gl);
         this.wire = false;
-        this.program = createProgram(gl, cubeVertex, cubeFragment);
         // vertices
         this.vertices = new Float32Array([
             0, 0, 0,
@@ -146,95 +242,6 @@ class Cube {
         this.buffered = false;
     }
 
-    /**
-     * Creates the buffers for the program. Intended for internal use.
-     *
-     * @param {WebGLRenderingContext} gl WebGL context
-     */
-    bufferData(gl) {
-        this.verticesBuffer = gl.createBuffer();
-        this.trianglesBuffer = gl.createBuffer();
-        this.colorsBuffer = gl.createBuffer();
-        this.edgesBuffer = gl.createBuffer();
-        this.edgeColorsBuffer = gl.createBuffer();
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.triangles, gl.STATIC_DRAW);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgesBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.edges, gl.STATIC_DRAW);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.edgeColorsBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.edgeColors, gl.STATIC_DRAW);
-
-        this.buffered = true;
-    }
-
-    // render
-    /**
-     * Draws a cube using the provided context and the projection
-     * matrix.
-     *
-     * @param {WebGLRenderingContext} gl WebGL context
-     * @param {Matrix} projection Projection matrix
-     */
-    render(gl, projection, view) {
-        if (!this.buffered) {
-            this.bufferData(gl);
-        }
-
-        // TODO Create bindings between the cube data and the shaders
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-        let vert = gl.getAttribLocation(this.program, "cubeLocation");
-        gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(vert);
-        // TODO bind verticesBuffer to the cubeLocation attribute (ARRAY_BUFFER)
-
-        // TODO bind colorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
-        let col = gl.getAttribLocation(this.program, "cubeColor");
-        gl.vertexAttribPointer(col, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(col);
-
-
-        gl.useProgram(this.program);
-
-        // TODO bind projection (get its data as an array) to the projection uniform (it is a matrix)
-        // TODO bind this.model (get its data as an array) to the matModel uniform (it is a matrix)
-
-        let model = gl.getUniformLocation(this.program, "model");
-        gl.uniformMatrix4fv(model, false, this.getModel().getData());
-
-        let proj = gl.getUniformLocation(this.program, "projection");
-        gl.uniformMatrix4fv(proj, false, projection.getData());
-
-        // Bind the view uniform
-        let v = gl.getUniformLocation(this.program, "view");
-        gl.uniformMatrix4fv(v, false, view.getData());
-
-
-        if (!this.wire) {
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
-            gl.drawElements(gl.TRIANGLE_STRIP, this.triangles.length, gl.UNSIGNED_BYTE, 0);
-        }
-
-        // wire frame
-        // TODO bind edgeColorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.edgeColorsBuffer);
-        let eCol = gl.getAttribLocation(this.program, "cubeColor");
-        gl.vertexAttribPointer(eCol, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(eCol);
-
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgesBuffer);
-        gl.drawElements(gl.LINES, this.edges.length, gl.UNSIGNED_BYTE, 0);
-    }
 
     /**
      * Sets the this.scaleMatrix variable to a new scaling matrix that uses the
@@ -370,22 +377,30 @@ class Cube {
     }
 }
 
-class Tetra {
+class Tetra extends Shape {
     /**
      * Creates a cube.
      *
      * @param {WebGLRenderingContext} gl WebGL Context
      */
     constructor(gl) {
-        // shaders
+        super(gl);
         this.wire = false;
-        this.program = createProgram(gl, cubeVertex, cubeFragment);
         // vertices
+        // this.vertices = new Float32Array([
+        //     0, 0, 0,
+        //     -1, -1, -1,
+        //     1, -1, 1,
+        //     0, -1, -1
+        // ]);
+
         this.vertices = new Float32Array([
             0, 0, 0,
-            -1, -1, -1,
+            -1, -1, 1,
             1, -1, 1,
-            0, -1, -1
+            0, -1, -1,
+            -1, -1, 1,
+            1, -1, 1
         ]);
 
         // triangles
@@ -474,95 +489,6 @@ class Tetra {
         this.buffered = false;
     }
 
-    /**
-     * Creates the buffers for the program. Intended for internal use.
-     *
-     * @param {WebGLRenderingContext} gl WebGL context
-     */
-    bufferData(gl) {
-        this.verticesBuffer = gl.createBuffer();
-        this.trianglesBuffer = gl.createBuffer();
-        this.colorsBuffer = gl.createBuffer();
-        this.edgesBuffer = gl.createBuffer();
-        this.edgeColorsBuffer = gl.createBuffer();
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.triangles, gl.STATIC_DRAW);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgesBuffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.edges, gl.STATIC_DRAW);
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.edgeColorsBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.edgeColors, gl.STATIC_DRAW);
-
-        this.buffered = true;
-    }
-
-    // render
-    /**
-     * Draws a cube using the provided context and the projection
-     * matrix.
-     *
-     * @param {WebGLRenderingContext} gl WebGL context
-     * @param {Matrix} projection Projection matrix
-     */
-    render(gl, projection, view) {
-        if (!this.buffered) {
-            this.bufferData(gl);
-        }
-
-        // TODO Create bindings between the cube data and the shaders
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
-        let vert = gl.getAttribLocation(this.program, "cubeLocation");
-        gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(vert);
-        // TODO bind verticesBuffer to the cubeLocation attribute (ARRAY_BUFFER)
-
-        // TODO bind colorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.colorsBuffer);
-        let col = gl.getAttribLocation(this.program, "cubeColor");
-        gl.vertexAttribPointer(col, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(col);
-
-
-        gl.useProgram(this.program);
-
-        // TODO bind projection (get its data as an array) to the projection uniform (it is a matrix)
-        // TODO bind this.model (get its data as an array) to the matModel uniform (it is a matrix)
-
-        let model = gl.getUniformLocation(this.program, "model");
-        gl.uniformMatrix4fv(model, false, this.getModel().getData());
-
-        let proj = gl.getUniformLocation(this.program, "projection");
-        gl.uniformMatrix4fv(proj, false, projection.getData());
-
-        // Bind the view uniform
-        let v = gl.getUniformLocation(this.program, "view");
-        gl.uniformMatrix4fv(v, false, view.getData());
-
-
-        if (!this.wire) {
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
-            gl.drawElements(gl.TRIANGLE_STRIP, this.triangles.length, gl.UNSIGNED_BYTE, 0);
-        }
-
-        // wire frame
-        // TODO bind edgeColorsBuffer to the cubeColor attribute (ARRAY_BUFFER)
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.edgeColorsBuffer);
-        let eCol = gl.getAttribLocation(this.program, "cubeColor");
-        gl.vertexAttribPointer(eCol, 4, gl.FLOAT, false, 0, 0);
-        gl.enableVertexAttribArray(eCol);
-
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.edgesBuffer);
-        gl.drawElements(gl.LINES, this.edges.length, gl.UNSIGNED_BYTE, 0);
-    }
 
     /**
      * Sets the this.scaleMatrix variable to a new scaling matrix that uses the
