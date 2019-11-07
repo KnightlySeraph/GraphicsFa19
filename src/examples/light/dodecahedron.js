@@ -11,7 +11,26 @@ const decVertex = `
     uniform mat4 model;
     uniform mat4 projection;
 
+    // add normal, light, color and model uniform 
+    uniform vec4 ambientLight;  // Light * material
+    uniform vec4 diffuseLight;  // light * material
+
+    uniform vec4 lightPos; // World/Camera coords
+    attribute vec4 normal; // Model coords
+
+    varying vec4 color;
+
     void main() {
+
+        // get the dot of the norm and the light
+        vec4 light = normalize(-lightPos);
+        float diffuseDot = max(dot(light, -normalize(model * normal)), 0.0);
+        
+        // update color
+        color = ambientLight + diffuseLight * diffuseDot;
+        color.a = 1.0;       
+
+
        gl_Position = projection * view * model * location;
     }
 
@@ -24,23 +43,28 @@ const decFragment = `
     precision mediump float;
     
     // add normal, light, color and model uniform 
-    uniform vec4 ambientLight;  // Light * material
-    uniform vec4 diffuseLight;  // light * material
+    // uniform vec4 ambientLight;  // Light * material
+    // uniform vec4 diffuseLight;  // light * material
 
-    uniform vec4 lightPos;
-    uniform vec4 normal;
+    // uniform vec4 lightPos; // World/Camera coords
+    // uniform vec4 normal; // Model coords
+    // uniform mat4 fmodel; // Moves the normal to world coords
+
+    varying vec4 color;
+
       
 
     void main() {
         // compute the normalized vector
 
-        // get the dot of the norm and the light
-        vec4 light = normalize(-lightPos);
-        float diffuseDot = max(dot(light, normal), 0.0);
+        // // get the dot of the norm and the light
+        // vec4 light = normalize(-lightPos);
+        // float diffuseDot = max(dot(light, normalize(fmodel * normal)), 0.0);
         
-        // update color
-        gl_FragColor = ambientLight + diffuseLight * diffuseDot;
-        gl_FragColor.a = 1.0;       
+        // // update color
+        // gl_FragColor = ambientLight + diffuseLight * diffuseDot;
+        // gl_FragColor.a = 1.0;       
+        gl_FragColor = color;
     }
 `;
 
@@ -241,11 +265,17 @@ class Dodecahedron {
         let diffuse = gl.getUniformLocation(this.decProgram, "diffuseLight");
         let diffColor = this.multArray(this.diffuseColor, this.diffuseMaterial);
         let lightPos = gl.getUniformLocation(this.decProgram, "lightPos");
-        let normal = gl.getUniformLocation(this.decProgram, "normal");
+        // let normal = gl.getUniformLocation(this.decProgram, "normal");
+        let normal = gl.getAttribLocation(this.decProgram, "normal");
+        // let nModel = gl.getUniformLocation(this.decProgram, "fmodel");
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
         gl.vertexAttribPointer(verLoc, 3, gl.FLOAT, false, 0, 0);
         gl.enableVertexAttribArray(verLoc);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        gl.vertexAttribPointer(normal, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(normal);
 
         gl.useProgram(this.decProgram);
 
@@ -256,8 +286,8 @@ class Dodecahedron {
         // Fragment shader bindings
         gl.uniform4fv(ambient, ambColor);
         gl.uniform4fv(diffuse, diffColor);
-        // TODO
-        // gl.uniform4fv()
+        gl.uniform4fv(lightPos, this.lightPosition);
+        // gl.uniformMatrix4fv(nModel, false, this.getModel().getData());
 
 
         // show normals
@@ -266,6 +296,7 @@ class Dodecahedron {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
         for (let i = 0; i < 12; i++) {
             let norm = this.getNormal(i);
+            // gl.uniform4fv(normal, norm.getData());
 
             this.edges[i * 6] = 0;
             this.edges[i * 6 + 1] = 0;
