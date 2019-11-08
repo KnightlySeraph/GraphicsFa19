@@ -446,7 +446,7 @@ class Vector {
      *
      * @param {Vector} v Vector to subtract from the current vector.
      *
-     * @return {number} The difference of the current vector and the parameter.
+     * @return {Vector} The difference of the current vector and the parameter.
      */
     subtract(v) {
         // TODO
@@ -692,12 +692,11 @@ class Camera {
      * @return {Matrix} A calculated view matrix
      */
     viewPoint (loc, vnVector, upVector) {
-        console.log("Ohh, look at me the view point function getting used!");
         // Create n prime
         let nprime = vnVector.normalize();
 
         // Create v vector
-        let v = upVector.subtract(upVector.dotProduct(nprime).dotProduct(nprime));
+        let v = upVector.subtract(nprime.scale(upVector.dotProduct(nprime)))
         // create v prime
         let vprime = v.normalize();
         // create u prime
@@ -710,7 +709,7 @@ class Camera {
             0, 0, 0, 1]);
 
         // Create a translation matrix
-        let trans = new Matrix().translate(loc.getX(), loc.getY(), loc.getZ());
+        let trans = new Matrix().translate(-loc.getX(), -loc.getY(), -loc.getZ());
 
         // Set the new view matrix
         this.viewMatrix = rot.mult(trans);

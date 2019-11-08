@@ -1,4 +1,5 @@
 // allows classes to be used
+// eslint-disable-next-line no-unused-vars
 var Matrix = require("../../src/shared/matrix-math").Matrix;
 var Vector = require("../../src/shared/matrix-math").Vector;
 var Camera = require("../../src/shared/matrix-math").Camera;
@@ -69,7 +70,14 @@ describe("Camera", function() {
     });
 
     it("ViewUp", function() {
-
+        let c = new Camera();
+        let loc = new Vector([5, 9, 8.5]); // Arbitrarily decided numbers to figure out whether LookAt returns the right thing or not
+        let vn = new Vector([3, 4, 9]);
+        let up = new Vector([0, 2, 5]);
+        c.viewPoint(loc, vn, up);
+        testMatrix(c.getView(),
+            [-0.1228, 0.9487, 0.2914, 0, -0.7372, 0, 0.3885, 0, 0.3686, 0.3162, 0.8742, 0, -4.1157, 7.4312, 12.3842, 1],
+            "Called after setting a view matrix with the viewPoint function");
     });
 
 });
