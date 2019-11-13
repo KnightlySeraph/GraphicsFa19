@@ -1,4 +1,5 @@
 // allows classes to be used
+// eslint-disable-next-line no-unused-vars
 var Matrix = require("../../src/shared/matrix-math").Matrix;
 var Vector = require("../../src/shared/matrix-math").Vector;
 var Camera = require("../../src/shared/matrix-math").Camera;
@@ -39,8 +40,44 @@ describe("Camera", function() {
         let far = 50;
         c.ortho(left, right, bottom, top, near, far);
         testMatrix(c.getProjection(),
-            [0.05, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, -0.05, -1.5, 0, 0, 0, 1],
+            [0.05, 0, 0, 0, 0, 0.05, 0, 0, 0, 0, -0.05, 0, 0, 0, -1.5, 1],
             "Calling getProjection after setting up an ortho projection");
+    });
+
+    it("Frustum", function() {
+        let c = new Camera();
+        let left = -20;
+        let right = 20;
+        let bottom = -20;
+        let top = 20;
+        let near = 10;
+        let far = 50;
+        c.frustum(left, right, bottom, top, near, far);
+        testMatrix(c.getProjection(),
+            [0.5, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, -1.5, -1, 0, 0, -25, 0],
+            "Calling getProjection after setting a frustum");
+    });
+
+    it("LookAt", function() {
+        let c = new Camera();
+        let eye = new Vector([5, 9, 8.5]); // Arbitrarily decided numbers to figure out whether LookAt returns the right thing or not
+        let look = new Vector([3, 4, 9]);
+        let viewUp = new Vector([0, 2, 5]);
+        c.lookAt(eye, look, viewUp);
+        testMatrix(c.getView(), // Based on the feedback when this fails it looks like its actually close
+            [-0.9239, -0.0968, 0.373, 0, 0.3553, 0.138, 0.9325, 0, -0.1421, 0.9855, -0.0933, 0, -2.6294, 9.1311, 4.0093, 1],
+            "Called after setting a lookAt view matrix");
+    });
+
+    it("ViewUp", function() {
+        let c = new Camera();
+        let loc = new Vector([5, 9, 8.5]); // Arbitrarily decided numbers to figure out whether LookAt returns the right thing or not
+        let vn = new Vector([3, 4, 9]);
+        let up = new Vector([0, 2, 5]);
+        c.viewPoint(loc, vn, up);
+        testMatrix(c.getView(),
+            [-0.1228, 0.9487, 0.2914, 0, -0.7372, 0, 0.3885, 0, 0.3686, 0.3162, 0.8742, 0, -4.1157, 7.4312, 12.3842, 1],
+            "Called after setting a view matrix with the viewPoint function");
     });
 
 });
