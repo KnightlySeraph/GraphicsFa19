@@ -28,16 +28,29 @@ const decFragment = `
 
     // TODO Need the location of the viewer 
     // and the point light source
+    uniform vec3 p;
+    uniform vec3 n;
+    uniform vec3 v;
+    uniform vec3 i;
     
     // TODO get the data from the Vertex shader
    
     // TODO Need values to compute the light illumination
+    // Light Values
+    uniform vec3 ambLight;
+    uniform vec3 ambReflection;
+    uniform vec3 difLight;
+    uniform vec3 difReflection;
+    uniform vec3 specLight;
+    uniform vec3 specReflection;
+
     // Use Phong reflection model
     // Assume that it is a point source, so calculate distance 
     // for the diffuse and specular light
 
     void main() {
         // TODO Calculate the vectors you need
+        float ambRed = ambLight.x * ambLight.y;
         // Make sure you normalize them
 
         // TODO calculate distance
@@ -227,6 +240,28 @@ class Dodecahedron {
 
         // TODO bind all new uniform and attribute values in the shaders
         // fragment shader uniforms
+        let viewer = gl.getUniformLocation(this.decProgram, "v");
+        let point = gl.getUniformLocation(this.decProgram, "p");
+
+        gl.uniform3fv(viewer, this.viewer);
+        gl.uniform3fv(point, this.point);
+
+        // Materials and Color binds
+        let ambColor = gl.getUniformLocation(this.decProgram, "ambColor");
+        let difColor = gl.getUniformLocation(this.decProgram, "difColor");
+        let specColor = gl.getUniformLocation(this.decProgram, "specColor");
+
+        let ambMaterial = gl.getUniformLocation(this.decProgram, "ambMaterial");
+        let difMaterial = gl.getUniformLocation(this.decProgram, "difMaterial");
+        let specMaterial = gl.getUniformLocation(this.decProgram, "specMaterial");
+
+        gl.uniform4fv(ambColor, this.ambientColor);
+        gl.uniform4fv(difColor, this.diffuseColor);
+        gl.uniform4fv(specColor, this.specularColor);
+
+        gl.uniform4fv(ambMaterial, this.ambientMaterial);
+        gl.uniform4fv(difMaterial, this.diffuseMaterial);
+        gl.uniform4fv(specMaterial, this.specularMaterial);
 
         // Draw shape
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
