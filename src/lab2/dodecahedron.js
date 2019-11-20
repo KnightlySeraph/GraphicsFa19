@@ -28,39 +28,71 @@ const decFragment = `
 
     // TODO Need the location of the viewer 
     // and the point light source
-    uniform vec3 p;
-    uniform vec3 n;
-    uniform vec3 v;
-    uniform vec3 i;
+    uniform vec4 lightPos;
+    // uniform vec4 point_light;
     
     // TODO get the data from the Vertex shader
    
     // TODO Need values to compute the light illumination
     // Light Values
-    uniform vec3 ambLight;
-    uniform vec3 ambReflection;
-    uniform vec3 difLight;
-    uniform vec3 difReflection;
-    uniform vec3 specLight;
-    uniform vec3 specReflection;
+    uniform vec4 ambLight;
+    uniform vec4 ambReflection;
+    uniform vec4 difLight;
+    uniform vec4 difReflection;
+    uniform vec4 specLight;
+    uniform vec4 specReflection;
 
     // Use Phong reflection model
     // Assume that it is a point source, so calculate distance 
     // for the diffuse and specular light
 
+    // Coeffecient Numbers
+    uniform float a;
+    uniform float b;
+    uniform float c;
+
+    // Other
+    uniform mat4 fmodel;
+    uniform vec4 normal;
+
+    // Specular
+    uniform float shiny;
+
     void main() {
         // TODO Calculate the vectors you need
-        float ambRed = ambLight.x * ambLight.y;
-        // Make sure you normalize them
+        // Posiiton of the light
+        vec4 light = normalize(-lightPos);
 
         // TODO calculate distance
+        // position of noral minus position of light
+        float dist = distance(normal, light);
+        float co = (1.0) / (a + (b * dist) + (c * (dist * dist)));
         
         // TODO calculate the illumination
         // If the light is not hitting the front of the polygon, 
         // the color is black.
+
+        // Ambient Illumination
+        // Multiply Light times the material
+        vec4 aI = ambLight * ambReflection;
+
+        // Diffuse Illumination
+        // Diff Dot
+        float dDot = max(dot(light, normalize(fmodel * normal)), 0.0);
+        // Diffuse Light
+        vec4 dI = difLight * dDot;
+        dI = normalize(dI);
+
+        // Specular Illumination
+        float rv = dot(light, normalize(fmodel * normal));
+        rv = pow(rv, shiny);
+        rv = max(rv, 0.0);
+        rv = rv;
+        vec4 sI = rv * specLight * specReflection;
+
                
         // TODO update color
-        gl_FragColor = vec4(0.5, 0.5, 0.5, 1); // update 
+        gl_FragColor = co * (sI + dI + aI); // update 
         gl_FragColor.a = 1.0; // make sure the alpha is 1
     }
 `;
@@ -240,20 +272,21 @@ class Dodecahedron {
 
         // TODO bind all new uniform and attribute values in the shaders
         // fragment shader uniforms
-        let viewer = gl.getUniformLocation(this.decProgram, "v");
-        let point = gl.getUniformLocation(this.decProgram, "p");
+        // let viewer = gl.getUniformLocation(this.decProgram, "v");
+        // let point = gl.getUniformLocation(this.decProgram, "p");
 
-        gl.uniform3fv(viewer, this.viewer);
-        gl.uniform3fv(point, this.point);
+        // gl.uniform4fv(viewer, this.viewer.getData());
+        
+        // gl.uniform4fv(point, this.point);
 
         // Materials and Color binds
         let ambColor = gl.getUniformLocation(this.decProgram, "ambColor");
         let difColor = gl.getUniformLocation(this.decProgram, "difColor");
         let specColor = gl.getUniformLocation(this.decProgram, "specColor");
 
-        let ambMaterial = gl.getUniformLocation(this.decProgram, "ambMaterial");
-        let difMaterial = gl.getUniformLocation(this.decProgram, "difMaterial");
-        let specMaterial = gl.getUniformLocation(this.decProgram, "specMaterial");
+        let ambMaterial = gl.getUniformLocation(this.decProgram, "ambReflection");
+        let difMaterial = gl.getUniformLocation(this.decProgram, "difReflection");
+        let specMaterial = gl.getUniformLocation(this.decProgram, "specReflection");
 
         gl.uniform4fv(ambColor, this.ambientColor);
         gl.uniform4fv(difColor, this.diffuseColor);
@@ -263,9 +296,37 @@ class Dodecahedron {
         gl.uniform4fv(difMaterial, this.diffuseMaterial);
         gl.uniform4fv(specMaterial, this.specularMaterial);
 
+        // Light binds
+        let lPos = gl.getUniformLocation(this.decProgram, "lightPos");
+        gl.uniform4fv(lPos, this.lightPosition);
+
+        // Specular Stuff
+        let s = gl.getUniformLocation(this.decProgram, "shiny");
+        gl.uniform1f(s, this.shiny);
+
+        // Other Binds
+        // Model
+        let mod = gl.getUniformLocation(this.decProgram, "fmodel");
+        gl.uniformMatrix4fv(mod, false, this.getModel().getData());
+
+        // Coeffcient binds
+        let aB = gl.getUniformLocation(this.decProgram, "a");
+        let bB = gl.getUniformLocation(this.decProgram, "b");
+        let cB = gl.getUniformLocation(this.decProgram, "c");
+
+        gl.uniform1f(aB, this.a);
+        gl.uniform1f(bB, this.b);
+        gl.uniform1f(cB, this.c);
+
+        // Normals
+        let norm = gl.getUniformLocation(this.decProgram, "normal");
+
+
         // Draw shape
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
         for (let i = 0; i < 12; i++) {
+            // Send normals to shaders
+            gl.uniform4fv(norm, this.getNormal(i).getData());
             gl.drawElements(gl.TRIANGLE_FAN, 5, gl.UNSIGNED_BYTE, i * 5);
         }
 
@@ -402,6 +463,35 @@ class Dodecahedron {
         this.b = b;
         this.c = c;
     }
+
+    getNormal(face) {
+        let p1 = this.getPoint(this.triangles[face * 5]);
+        let p2 = this.getPoint(this.triangles[face * 5 + 1]);
+        let p3 = this.getPoint(this.triangles[face * 5 + 2]);
+
+        let n1 = this.subVec(p3, p1).crossProduct(this.subVec(p2, p1));
+        // console.log(p1.getData(), p2.getData(), p3.getData())
+        n1.normalize();
+
+        return n1;
+    }
+
+    getPoint(index) {
+        let x = this.vertices[index * 3];
+        let y = this.vertices[index * 3 + 1];
+        let z = this.vertices[index * 3 + 2];
+
+        return new Vector([x, y, z]);
+    }
+
+    subVec(v1, v2) {
+        return new Vector([v1.getX() - v2.getX(), v1.getY() - v2.getY(), v1.getZ() - v2.getZ()]);
+    }
+
+    addVec(v1, v2) {
+        return new Vector([v1.getX() + v2.getX(), v1.getY() + v2.getY(), v1.getZ() + v2.getZ()]);
+    }
+
 }
 
 /**
