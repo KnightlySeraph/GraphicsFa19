@@ -7,6 +7,7 @@
 const cubeVertex = `
     attribute vec4 cubeLocation;
     attribute vec4 cubeColor;
+    attribute vec2 texCoord;
 
     // TODO add variables for texture
     //  need to pass the data to the fragment shader    
@@ -16,11 +17,13 @@ const cubeVertex = `
     uniform mat4 projection;
 
     varying lowp vec4 cColor;
+    varying lowp vec2 tPos;
     
 
     void main() {
        gl_Position = projection * view * model * cubeLocation;
-       cColor = cubeColor;   
+       cColor = cubeColor; 
+       tPos = texCoord;  
         
     }
 
@@ -32,12 +35,16 @@ const cubeVertex = `
 const cubeFragment = `
     precision lowp float;
     varying lowp vec4 cColor;
+    varying lowp vec2 tPos;
     
+    uniform sampler2D tex;
+
     // TODO add variables for texture
+    
         
     void main() {
         // TODO update color
-       gl_FragColor = cColor;
+       gl_FragColor = texture2D(tex, tPos); // cColor;
     }
 `;
 
@@ -193,12 +200,23 @@ class Cube {
         gl.bufferData(gl.ARRAY_BUFFER, this.textures, gl.STATIC_DRAW);
 
         // TODO create and bind texture
-
+        this.tex = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE1);
+        gl.bindTexture(gl.TEXTURE_2D, this.tex);
 
         // TODO create temp texture
-
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([1, 1, 0, 1]));
 
         // TODO load image with onload callback
+        let img = new Image(1, 1);
+        const texture = this.tex;
+        img.onload = function() {
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+        };
+        img.src = "D:\\Student Data\\Desktop\\GraphicsRepo\\GraphicsFa19\\src\\examples\\texture\\texture1.jpg";
 
 
         this.buffered = true;
@@ -224,6 +242,8 @@ class Cube {
         let matModel = gl.getUniformLocation(this.program, "model");
 
         // TODO get new shader variables
+        let texPos = gl.getAttribLocation(this.program, "texCoord");
+        let sampler = gl.getUniformLocation(this.program, "tex");
 
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
@@ -235,6 +255,9 @@ class Cube {
         gl.enableVertexAttribArray(verCol);
 
         // TODO add additional bindings for textures
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.textureBuffer);
+        gl.vertexAttribPointer(texPos, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(texPos);
 
 
         gl.useProgram(this.program);
@@ -243,6 +266,7 @@ class Cube {
         gl.uniformMatrix4fv(matProjection, false, projection.getData());
         gl.uniformMatrix4fv(matView, false, view.getData());
         gl.uniformMatrix4fv(matModel, false, this.getModel().getData());
+        gl.uniform1i(sampler, 1);
 
         if (!this.wire) {
             // TODO bind texture
