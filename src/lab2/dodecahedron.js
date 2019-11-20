@@ -29,7 +29,6 @@ const decFragment = `
     // TODO Need the location of the viewer 
     // and the point light source
     uniform vec4 lightPos;
-    // uniform vec4 point_light;
     
     // TODO get the data from the Vertex shader
    
@@ -54,18 +53,23 @@ const decFragment = `
     // Other
     uniform mat4 fmodel;
     uniform vec4 normal;
+    vec3 normalC = normal.xyz;
 
     // Specular
     uniform float shiny;
 
     void main() {
+        // Convert some stuff to vec3s
+        vec3 normalC = normal.xyz;
+        vec3 lightPosC = lightPos.xyz;
+
         // TODO Calculate the vectors you need
         // Posiiton of the light
-        vec4 light = normalize(-lightPos);
+        vec3 light = normalize(-lightPosC);
 
         // TODO calculate distance
         // position of noral minus position of light
-        float dist = distance(normal, light);
+        float dist = distance(normalC, light);
         float co = (1.0) / (a + (b * dist) + (c * (dist * dist)));
         
         // TODO calculate the illumination
@@ -75,24 +79,26 @@ const decFragment = `
         // Ambient Illumination
         // Multiply Light times the material
         vec4 aI = ambReflection * ambLight;
+        aI = normalize(aI);
 
         // Diffuse Illumination
         // Diff Dot
-        float dDot = max(dot(light, normalize(fmodel * normal)), 0.0);
+        float dDot = max(dot(light, normalize(fmodel * normalC)), 0.0);
         // Diffuse Light
         vec4 dI = difLight * dDot;
-        dI = normalize(dI);
 
         // Specular Illumination
-        float rv = dot(light, normalize(fmodel * normal));
+        float rv = dot(light, normalize(fmodel * normalC));
         rv = pow(rv, shiny);
         rv = max(rv, 0.0);
         rv = rv;
         vec4 sI = rv * specLight * specReflection;
 
+        vec4 cColor = (co * (sI + dI)) + aI;
+        cColor = normalize(cColor);
                
         // TODO update color
-        gl_FragColor = co * (sI + dI + aI); // update 
+        gl_FragColor = cColor; // update 
         gl_FragColor.a = 1.0; // make sure the alpha is 1
     }
 `;
