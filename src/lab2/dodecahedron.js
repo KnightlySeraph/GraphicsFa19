@@ -74,7 +74,7 @@ const decFragment = `
 
         // Ambient Illumination
         // Multiply Light times the material
-        vec4 aI = ambLight * ambReflection;
+        vec4 aI = ambReflection * ambLight;
 
         // Diffuse Illumination
         // Diff Dot
@@ -280,13 +280,14 @@ class Dodecahedron {
         // gl.uniform4fv(point, this.point);
 
         // Materials and Color binds
-        let ambColor = gl.getUniformLocation(this.decProgram, "ambColor");
-        let difColor = gl.getUniformLocation(this.decProgram, "difColor");
-        let specColor = gl.getUniformLocation(this.decProgram, "specColor");
+        let ambColor = gl.getUniformLocation(this.decProgram, "ambLight");
+        let difColor = gl.getUniformLocation(this.decProgram, "difLight");
+        let specColor = gl.getUniformLocation(this.decProgram, "specLight");
 
         let ambMaterial = gl.getUniformLocation(this.decProgram, "ambReflection");
         let difMaterial = gl.getUniformLocation(this.decProgram, "difReflection");
         let specMaterial = gl.getUniformLocation(this.decProgram, "specReflection");
+
 
         gl.uniform4fv(ambColor, this.ambientColor);
         gl.uniform4fv(difColor, this.diffuseColor);
