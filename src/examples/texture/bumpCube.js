@@ -236,8 +236,8 @@ class BumpCube {
         gl.bufferData(gl.ARRAY_BUFFER, this.colors, gl.STATIC_DRAW);
 
         // TODO add this back in
-        // this.normalTexture = this.createTexture(gl, "texture4.jpg", gl.TEXTURE3);
-        // this.bumpTexture = this.createTexture(gl, "bump6.png", gl.TEXTURE4);
+        this.normalTexture = this.createTexture(gl, "texture4.jpg", gl.TEXTURE3);
+        this.bumpTexture = this.createTexture(gl, "bump6.png", gl.TEXTURE4);
 
         this.buffered = true;
     }
@@ -288,7 +288,7 @@ class BumpCube {
         gl.useProgram(this.program);
 
         gl.uniform1i(sample, 3);
-        // gl.uniform1i(bumpSample, 4); // TODO add in
+        gl.uniform1i(bumpSample, 4); // TODO add in
         gl.uniform3fv(light, [1, 2, 0]);
 
         gl.uniformMatrix4fv(matProjection, false, projection.getData());

@@ -44,7 +44,7 @@ const cubeFragment = `
         
     void main() {
         // TODO update color
-       gl_FragColor = texture2D(tex, tPos); // cColor;
+       gl_FragColor = texture2D(tex, tPos) * cColor;
     }
 `;
 
@@ -223,7 +223,7 @@ class Cube {
 
             gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
         };
-        img.src = "texture2.jpg";
+        img.src = "texture1.jpg";
 
 
         this.buffered = true;
