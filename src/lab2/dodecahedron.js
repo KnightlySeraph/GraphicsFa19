@@ -53,23 +53,22 @@ const decFragment = `
     // Other
     uniform mat4 fmodel;
     uniform vec4 normal;
-    vec3 normalC = normal.xyz;
 
     // Specular
     uniform float shiny;
+    uniform vec4 viewer;
 
     void main() {
         // Convert some stuff to vec3s
-        vec3 normalC = normal.xyz;
-        vec3 lightPosC = lightPos.xyz;
+        
 
         // TODO Calculate the vectors you need
         // Posiiton of the light
-        vec3 light = normalize(-lightPosC);
+        vec4 light = normalize(-lightPos);
 
         // TODO calculate distance
         // position of noral minus position of light
-        float dist = distance(normalC, light);
+        float dist = distance(normal, light);
         float co = (1.0) / (a + (b * dist) + (c * (dist * dist)));
         
         // TODO calculate the illumination
@@ -79,23 +78,24 @@ const decFragment = `
         // Ambient Illumination
         // Multiply Light times the material
         vec4 aI = ambReflection * ambLight;
-        aI = normalize(aI);
 
         // Diffuse Illumination
         // Diff Dot
-        float dDot = max(dot(light, normalize(fmodel * normalC)), 0.0);
+        float dDot = max(dot(light, normalize(fmodel * normal)), 0.0);
         // Diffuse Light
-        vec4 dI = difLight * dDot;
+        vec4 dI = difReflection * difLight * dDot;
 
         // Specular Illumination
-        float rv = dot(light, normalize(fmodel * normalC));
-        rv = pow(rv, shiny);
+        vec4 v = normal - viewer;
+        v = normalize(v);
+        vec4 r = (2.0 * (light * normal) * normal) - 1.0;
+        r = normalize(r);
+        float rv = dot(r, v);
         rv = max(rv, 0.0);
-        rv = rv;
+        rv = pow(rv, shiny);
         vec4 sI = rv * specLight * specReflection;
 
-        vec4 cColor = (co * (sI + dI)) + aI;
-        cColor = normalize(cColor);
+        vec4 cColor = co*(sI + dI) + aI;
                
         // TODO update color
         gl_FragColor = cColor; // update 
@@ -278,12 +278,6 @@ class Dodecahedron {
 
         // TODO bind all new uniform and attribute values in the shaders
         // fragment shader uniforms
-        // let viewer = gl.getUniformLocation(this.decProgram, "v");
-        // let point = gl.getUniformLocation(this.decProgram, "p");
-
-        // gl.uniform4fv(viewer, this.viewer.getData());
-        
-        // gl.uniform4fv(point, this.point);
 
         // Materials and Color binds
         let ambColor = gl.getUniformLocation(this.decProgram, "ambLight");
@@ -324,6 +318,10 @@ class Dodecahedron {
         gl.uniform1f(aB, this.a);
         gl.uniform1f(bB, this.b);
         gl.uniform1f(cB, this.c);
+
+        // Viewer
+        let sViewer = gl.getUniformLocation(this.decProgram, "viewer");
+        gl.uniform4fv(sViewer, new Float32Array([1.0, 1.0, 1.0, 0.0]));
 
         // Normals
         let norm = gl.getUniformLocation(this.decProgram, "normal");
