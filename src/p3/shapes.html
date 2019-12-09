@@ -5,6 +5,7 @@
     <script src="../shared/program.js"></script>
     <script src="../shared/axis.js"></script>
     <script src="../shared/matrix-math.js"></script>
+    <script src = "../p3/shapes.js"></script>
     <!-- TODO Add any additional script files here -->
     <style type="text/css">
         canvas {
@@ -166,15 +167,15 @@
             for (let i = 0; i < radios.length; i++) {
                 if (radios[i].type === "radio" && radios[i].checked) {
                     if (radios[i].id === "cube") {
-                        data.shape = new Cube();
+                        data.shape = new Cube(data.glContext);
                     }
                     else {
                         if (radios[i].id === "cylinder") {
-                            data.shape = new Cylinder(level * 5);
+                            data.shape = new Cylinder(data.glContext, level * 5);
                         }
                         else {
                             if (radios[i].id === "sphere") {
-                                data.shape = new Sphere(level / 2);
+                                data.shape = new Sphere(data.glContext, level / 2);
                             }
                             else {
                                 if (radios[i].id === "sphere2") {
@@ -264,7 +265,7 @@
                 rotating: true,
                 axes: new Axes(-1, 1, -1, 1, -1, 1, 10),
                 // rename this
-                shape: new Cube(),
+                shape: new Cube(gl),
                 
                 proj: new Matrix([1, 0, 0, 0, 
                     0, 1, 0, 0,
