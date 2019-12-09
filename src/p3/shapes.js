@@ -1,4 +1,4 @@
-/* global Matrix createProgram */
+/* global Matrix createProgram Vector*/
 /* eslint no-unused-vars: ["warn", { "varsIgnorePattern": "Cube"}] */
 /* eslint no-unused-vars: ["warn", { "varsIgnorePattern": "Tetra"}] */
 
@@ -824,22 +824,29 @@ class Sphere extends Shape {
 
         // Tesselate
         if (detail !== 0.5) {
-            console.log("Tessels");
+   
             for (let i = 0; i < detail; i++) {
-                // Get Tesselated list of new triangles
-                let t = this.triangleList[i].tesselate();
 
-                for (let z = 0; z < t.length; z++) {
-                    this.tempList.push(t[z]);
+                for (let x = 0; x < this.triangleList.length; x++) {
+
+                    // Get Tesselated list of new triangles
+                    let t = this.triangleList[x].tesselate();
+
+                    for (let z = 0; z < t.length; z++) {
+                        this.tempList.push(t[z]);
+                    }
+
                 }
+
+                // Update the triangle list
+                this.triangleList = [];
+                this.triangleList = this.tempList;
+                // Clear the temp list
+                this.tempList = [];
             }
         }
 
-        if (detail !== 0.5) {
-            // Overwrite this.triangleList
-            this.triangleList = this.tempList;
-        }
-
+        
         // Populate points
         for (let i = 0; i < this.triangleList.length; i++) {
             // Unpack the returned list
@@ -860,16 +867,18 @@ class Sphere extends Shape {
 
         // create base octahedron
         this.vertices = new Float32Array(this.points);
+        this.triangles = new Uint16Array(this.points);
 
-        // triangles
-        this.triangles = new Uint8Array([
-            0, 1, 3, 5, // bottom
-            6, 7, // front
-            2, 4, // top
-            0, 1, // back
-            1, 4, 5, 7, // right
-            6, 2, 3, 0 // left
-        ]);
+
+        // // triangles
+        // this.triangles = new Uint8Array([
+        //     0, 1, 3, 5, // bottom
+        //     6, 7, // front
+        //     2, 4, // top
+        //     0, 1, // back
+        //     1, 4, 5, 7, // right
+        //     6, 2, 3, 0 // left
+        // ]);
         // colors
         this.colors = new Float32Array([
             0, 0, 0, 1, // black
@@ -915,7 +924,7 @@ class Sphere extends Shape {
 
 class Triangle {
     // Split into vertices
-    constructor (data = [0, 0, 0, 0, 0, 0, 0, 0, 0]) {
+    constructor (data = [0, 0, 0, 0, 0, 0, 0, 0, 0], radius = 1) {
         // Split data into vertices
         this.vertex1 = [data[0], data[1], data[2]];
         this.vertex2 = [data[3], data[4], data[5]];
@@ -923,6 +932,9 @@ class Triangle {
 
         // Set up a blank list of triangles
         this.triangles = [];
+
+        // Set a radius
+        this.radius = radius;
     }
 
     midpoint (vert1, vert2) {
@@ -958,6 +970,12 @@ class Triangle {
         let t4 = new Triangle([mpVert1Vert2[0], mpVert1Vert2[1], mpVert1Vert2[2],
             mpVert1Vert3[0], mpVert1Vert3[1], mpVert1Vert3[2],
             mpVert2Vert3[0], mpVert2Vert3[1], mpVert2Vert3[2]]);
+        
+        // Pop points to surface of sphere
+        t1 = this.pushPoints(t1);
+        t2 = this.pushPoints(t2);
+        t3 = this.pushPoints(t3);
+        t4 = this.pushPoints(t4);
 
         // Push to triangle list
         this.triangles.push(t1);
@@ -966,6 +984,31 @@ class Triangle {
         this.triangles.push(t4);
 
         return this.triangles;
+    }
+
+    pushPoints (triangle) {
+        let p = triangle.getData();
+
+        let vert1 = [p[0], p[1], p[2]];
+        let vert2 = [p[3], p[4], p[5]];
+        let vert3 = [p[6], p[7], p[8]];
+
+        let vec1 = new Vector(vert1);
+        let vec2 = new Vector(vert2);
+        let vec3 = new Vector(vert3);
+
+        vec1 = vec1.normalize();
+        vec2 = vec2.normalize();
+        vec3 = vec3.normalize();
+
+        vec1 = vec1.scale(this.radius);
+        vec2 = vec2.scale(this.radius);
+        vec3 = vec3.scale(this.radius);
+
+        return new Triangle([vec1.getX(), vec1.getY(), vec1.getZ(),
+            vec2.getX(), vec2.getY(), vec2.getZ(),
+            vec3.getX(), vec3.getY(), vec3.getZ()]);
+
     }
 
     getList () {
