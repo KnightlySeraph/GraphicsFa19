@@ -30,7 +30,7 @@ const cubeFragment = `
     varying lowp vec4 cColor;
 
     void main() {
-        gl_FragColor = cColor;
+        gl_FragColor = vec4(0.494, 0.596, 0.761, 1.0);
     }
 `;
 
@@ -143,7 +143,7 @@ class Shape {
 
         if (!this.wire) {
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.trianglesBuffer);
-            gl.drawElements(gl.TRIANGLES, this.triangles.length, gl.UNSIGNED_BYTE, 0);
+            gl.drawElements(gl.TRIANGLE_STRIP, this.triangles.length, gl.UNSIGNED_BYTE, 0);
         }
 
         // wire frame
@@ -685,6 +685,27 @@ class Cylinder extends Shape {
 
         }
 
+        this.circ1 = [0, 1, 0];
+        this.circ2 = [0, -1, 0];
+        // Setup Circles
+        for (let i = 0; i < 360; i++) {
+            let x = this.cRadius * Math.cos(i);
+            let z = this.cRadius * Math.sin(i);
+
+            // Top Circle
+            this.circ1.push(x);
+            this.circ1.push(1);
+            this.circ1.push(z);
+
+            // Bottom Circle
+            this.circ2.push(x);
+            this.circ2.push(-1);
+            this.circ2.push(z);
+        }
+
+        this.circ1Vertices = new Float32Array(this.circ1);
+        this.circ2Vertices = new Float32Array(this.circ2);
+
 
         this.vertices = new Float32Array(this.cylinderVertices);
 
@@ -774,6 +795,76 @@ class Cylinder extends Shape {
         this.buffered = false;
     }
 
+    bufferData(gl) {
+        this.verticesBuffer = gl.createBuffer();
+        this.trianglesBuffer = gl.createBuffer();
+        this.circ1Buffer = gl.createBuffer();
+        this.circ2Buffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.trianglesBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.triangles, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.circ1Buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.circ1Vertices, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.circ2Buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.circ2Vertices, gl.STATIC_DRAW);
+
+
+        this.buffered = true;
+    }
+
+    render(gl, projection, view) {
+        if (!this.buffered) {
+            this.bufferData(gl);
+        }
+
+        // TODO Create bindings between the cube data and the shaders
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        let vert = gl.getAttribLocation(this.program, "cubeLocation");
+        gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vert);
+
+
+        gl.useProgram(this.program);
+
+        // TODO bind projection (get its data as an array) to the projection uniform (it is a matrix)
+        // TODO bind this.model (get its data as an array) to the matModel uniform (it is a matrix)
+
+        let model = gl.getUniformLocation(this.program, "model");
+        gl.uniformMatrix4fv(model, false, this.getModel().getData());
+
+        let proj = gl.getUniformLocation(this.program, "projection");
+        gl.uniformMatrix4fv(proj, false, projection.getData());
+
+        // Bind the view uniform
+        let v = gl.getUniformLocation(this.program, "view");
+        gl.uniformMatrix4fv(v, false, view.getData());
+
+        // Draw vertices
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertices.length);
+
+        // Draw triangles
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.trianglesBuffer);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.triangles.length);
+
+        // Draw Circles
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.circ1Buffer);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.circ1Vertices.length);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.circ2Buffer);
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, this.circ2Vertices.length);
+
+        // Draw vertices
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        // gl.drawArrays(gl.POINTS, 0, this.vertices.length);
+
+    }
+
 }
 
 class Sphere extends Shape {
@@ -846,6 +937,7 @@ class Sphere extends Shape {
             }
         }
 
+        this.lines = [];
         
         // Populate points
         for (let i = 0; i < this.triangleList.length; i++) {
@@ -862,12 +954,37 @@ class Sphere extends Shape {
             this.points.push(d[6]);
             this.points.push(d[7]);
             this.points.push(d[8]);
+
+            // Push points for the frame
+            // Point 1 - > 3
+            this.lines.push(d[0]);
+            this.lines.push(d[1]);
+            this.lines.push(d[2]);
+            this.lines.push(d[6]);
+            this.lines.push(d[7]);
+            this.lines.push(d[8]);
+            // Point 1 -> 2
+            this.lines.push(d[0]);
+            this.lines.push(d[1]);
+            this.lines.push(d[2]);
+            this.lines.push(d[3]);
+            this.lines.push(d[4]);
+            this.lines.push(d[5]);
+            // Point 2 - > 3
+            this.lines.push(d[3]);
+            this.lines.push(d[4]);
+            this.lines.push(d[5]);
+            this.lines.push(d[6]);
+            this.lines.push(d[7]);
+            this.lines.push(d[8]);
+
         }
         console.log(this.points);
 
         // create base octahedron
         this.vertices = new Float32Array(this.points);
-        this.triangles = new Uint16Array(this.points);
+        this.triangles = new Float32Array(this.points);
+        this.frame = new Float32Array(this.lines);
 
 
         // // triangles
@@ -920,11 +1037,69 @@ class Sphere extends Shape {
 
         this.buffered = false;
     }
+
+    bufferData(gl) {
+        this.verticesBuffer = gl.createBuffer();
+        this.trianglesBuffer = gl.createBuffer();
+        this.wireFrameBuffer = gl.createBuffer();
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.vertices, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.trianglesBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.triangles, gl.STATIC_DRAW);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.wireFrameBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, this.frame, gl.STATIC_DRAW);
+
+        this.buffered = true;
+    }
+
+    render(gl, projection, view) {
+        if (!this.buffered) {
+            this.bufferData(gl);
+        }
+
+        // TODO Create bindings between the cube data and the shaders
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        let vert = gl.getAttribLocation(this.program, "cubeLocation");
+        gl.vertexAttribPointer(vert, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(vert);
+
+
+        gl.useProgram(this.program);
+
+        // TODO bind projection (get its data as an array) to the projection uniform (it is a matrix)
+        // TODO bind this.model (get its data as an array) to the matModel uniform (it is a matrix)
+
+        let model = gl.getUniformLocation(this.program, "model");
+        gl.uniformMatrix4fv(model, false, this.getModel().getData());
+
+        let proj = gl.getUniformLocation(this.program, "projection");
+        gl.uniformMatrix4fv(proj, false, projection.getData());
+
+        // Bind the view uniform
+        let v = gl.getUniformLocation(this.program, "view");
+        gl.uniformMatrix4fv(v, false, view.getData());
+
+        // Draw triangles
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this.trianglesBuffer);
+        // gl.drawArrays(gl.TRIANGLES, 0, this.triangles.length);
+
+        // Draw vertices
+        // gl.bindBuffer(gl.ARRAY_BUFFER, this.verticesBuffer);
+        // gl.drawArrays(gl.POINTS, 0, this.vertices.length);
+
+        // Draw wire frame
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.wireFrameBuffer);
+        gl.drawArrays(gl.LINES, 0, this.frame.length);
+    }
 }
 
 class Triangle {
     // Split into vertices
     constructor (data = [0, 0, 0, 0, 0, 0, 0, 0, 0], radius = 1) {
+        
         // Split data into vertices
         this.vertex1 = [data[0], data[1], data[2]];
         this.vertex2 = [data[3], data[4], data[5]];
@@ -953,18 +1128,18 @@ class Triangle {
         let mpVert1Vert2 = this.midpoint(this.vertex1, this.vertex2);
         let mpVert1Vert3 = this.midpoint(this.vertex1, this.vertex3);
         let mpVert2Vert3 = this.midpoint(this.vertex2, this.vertex3);
-
+        
         // Create triangles
         let t1 = new Triangle([this.vertex1[0], this.vertex1[1], this.vertex1[2],
             mpVert1Vert2[0], mpVert1Vert2[1], mpVert1Vert2[2],
             mpVert1Vert3[0], mpVert1Vert3[1], mpVert1Vert3[2]]);
 
         let t2 = new Triangle([this.vertex2[0], this.vertex2[1], this.vertex2[2],
-            mpVert1Vert3[0], mpVert1Vert3[1], mpVert1Vert3[3],
+            mpVert1Vert2[0], mpVert1Vert2[1], mpVert1Vert2[2],
             mpVert2Vert3[0], mpVert2Vert3[1], mpVert2Vert3[2]]);
 
         let t3 = new Triangle([this.vertex3[0], this.vertex3[1], this.vertex3[2],
-            mpVert1Vert2[0], mpVert1Vert2[1], mpVert1Vert2[2],
+            mpVert1Vert3[0], mpVert1Vert3[1], mpVert1Vert3[2],
             mpVert2Vert3[0], mpVert2Vert3[1], mpVert2Vert3[2]]);
 
         let t4 = new Triangle([mpVert1Vert2[0], mpVert1Vert2[1], mpVert1Vert2[2],
@@ -988,14 +1163,15 @@ class Triangle {
 
     pushPoints (triangle) {
         let p = triangle.getData();
-
         let vert1 = [p[0], p[1], p[2]];
         let vert2 = [p[3], p[4], p[5]];
         let vert3 = [p[6], p[7], p[8]];
 
+
         let vec1 = new Vector(vert1);
         let vec2 = new Vector(vert2);
         let vec3 = new Vector(vert3);
+        
 
         vec1 = vec1.normalize();
         vec2 = vec2.normalize();
@@ -1004,6 +1180,8 @@ class Triangle {
         vec1 = vec1.scale(this.radius);
         vec2 = vec2.scale(this.radius);
         vec3 = vec3.scale(this.radius);
+
+        
 
         return new Triangle([vec1.getX(), vec1.getY(), vec1.getZ(),
             vec2.getX(), vec2.getY(), vec2.getZ(),
